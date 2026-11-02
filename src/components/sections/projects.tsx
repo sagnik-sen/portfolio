@@ -85,7 +85,7 @@ export function Projects() {
               </div>
 
               <div>
-                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent-blue">
+                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent">
                   {p.eyebrow}
                 </span>
                 <h3 className="mt-4 text-2xl font-medium leading-snug text-primary md:text-[1.75rem]">

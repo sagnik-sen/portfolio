@@ -58,7 +58,7 @@ export function Skills() {
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h3 className="font-mono text-[12px] uppercase tracking-[0.15em] text-accent-blue">
+            <h3 className="font-mono text-[12px] uppercase tracking-[0.15em] text-accent">
               {group.label}
             </h3>
             <p className="mt-3 text-xl leading-relaxed text-secondary">

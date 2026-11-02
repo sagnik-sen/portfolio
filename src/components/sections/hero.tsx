@@ -27,7 +27,7 @@ export function Hero() {
           initial="hidden"
           animate="show"
           custom={0}
-          className="font-mono text-[13px] uppercase tracking-[0.2em] text-accent-blue"
+          className="font-mono text-[13px] uppercase tracking-[0.2em] text-accent"
         >
           Computer Science — VIT Chennai · AI &amp; GenAI
         </motion.p>

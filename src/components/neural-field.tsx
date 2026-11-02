@@ -61,12 +61,12 @@ export function NeuralField({ className, density = "full" }: NeuralFieldProps) {
     >
       <defs>
         <linearGradient id="nf-line" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="var(--accent-blue)" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="var(--accent-violet)" stopOpacity="0.5" />
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="var(--accent-soft)" stopOpacity="0.5" />
         </linearGradient>
         <radialGradient id="nf-node" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="var(--accent-blue)" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="var(--accent-blue)" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
         </radialGradient>
       </defs>
 

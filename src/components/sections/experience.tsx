@@ -57,7 +57,7 @@ export function Experience() {
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="relative grid grid-cols-1 gap-2 pl-8 md:grid-cols-[10rem_1fr] md:gap-8 md:pl-0"
             >
-              <div className="absolute left-[-5px] top-2 h-[9px] w-[9px] rounded-full bg-accent-blue md:left-[11rem]" />
+              <div className="absolute left-[-5px] top-2 h-[9px] w-[9px] rounded-full bg-accent md:left-[11rem]" />
               <span className="font-mono text-[13px] text-tertiary md:pl-8 md:text-right">
                 {item.date}
               </span>
