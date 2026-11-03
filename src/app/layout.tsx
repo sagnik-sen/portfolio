@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import { Instrument_Serif } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
-const geistSans = { variable: GeistSans.variable };
-const geistMono = { variable: GeistMono.variable };
+const serif = Instrument_Serif({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-instrument-serif",
+});
 
 export const metadata: Metadata = {
-  title: "Sagnik — AI Systems Engineer",
+  title: "Sagnik Sen",
   description:
-    "Computer Science student building applied AI/ML and GenAI systems — from LLM fine-tuning pipelines to production classification systems.",
+    "Computer science student at VIT Chennai working on applied machine learning: fine-tuning, serving and evaluating language models.",
 };
 
 export default function RootLayout({
@@ -20,9 +24,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

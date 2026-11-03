@@ -1,73 +1,49 @@
-"use client";
+import { Section } from "@/components/section";
 
-import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-import { NeuralField } from "@/components/neural-field";
+const EMAIL = "sen.sagnik9@gmail.com";
 
 const LINKS = [
-  { label: "Email", href: "mailto:sen.sagnik9@gmail.com", display: "sen.sagnik9@gmail.com" },
-  { label: "GitHub", href: "https://github.com/sagnik-sen", display: "github.com/sagnik-sen" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/sagnik-sen-71b848193/", display: "linkedin.com/in/sagnik-sen" },
+  { label: "GitHub", href: "https://github.com/sagnik-sen" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/sagnik-sen-71b848193/" },
 ];
+
+const linkClass =
+  "focus-ring underline decoration-line-strong decoration-1 underline-offset-[6px] transition-colors hover:decoration-accent";
 
 export function Contact() {
   return (
-    <section
-      id="contact"
-      className="relative overflow-hidden px-6 py-32 md:px-10"
-    >
-      <NeuralField
-        density="compact"
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.2]"
-      />
-
-      <div className="relative mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-tertiary">
-            Contact
-          </span>
-          <h2 className="mt-4 max-w-2xl text-3xl font-medium leading-tight text-primary md:text-5xl">
-            Open to internships and roles in applied AI — let&apos;s talk.
-          </h2>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-14 flex flex-col gap-5 border-t border-line pt-10 md:flex-row md:gap-16"
-        >
-          {LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              target={link.label !== "Email" ? "_blank" : undefined}
-              rel={link.label !== "Email" ? "noreferrer" : undefined}
-              className="focus-ring group flex items-center gap-1.5"
-            >
-              <span className="flex flex-col">
-                <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-tertiary">
-                  {link.label}
-                </span>
-                <span className="mt-1 text-base text-secondary transition-colors group-hover:text-primary">
-                  {link.display}
-                </span>
-              </span>
-              <ArrowUpRight className="h-3.5 w-3.5 text-tertiary transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
-            </a>
-          ))}
-        </motion.div>
-
-        <p className="mt-24 font-mono text-[12px] text-tertiary">
-          Designed &amp; built by Sagnik · {new Date().getFullYear()}
+    <>
+      <Section id="contact" label="Contact">
+        <p className="max-w-2xl text-xl leading-relaxed text-secondary md:text-2xl md:leading-relaxed">
+          I&apos;m looking for internships and roles in applied AI. Email is
+          the best way to reach me.
         </p>
-      </div>
-    </section>
+        <a
+          href={`mailto:${EMAIL}`}
+          className={`${linkClass} mt-8 inline-block break-all font-serif text-4xl text-primary sm:text-5xl md:text-6xl`}
+        >
+          {EMAIL}
+        </a>
+        <ul className="mt-10 flex gap-8 text-[15px] text-secondary">
+          {LINKS.map((l) => (
+            <li key={l.label}>
+              <a href={l.href} target="_blank" rel="noreferrer" className={`${linkClass} hover:text-primary`}>
+                {l.label} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 font-mono text-[12px] text-tertiary sm:flex-row sm:justify-between md:px-10">
+          <span>© {new Date().getFullYear()} Sagnik Sen</span>
+          <span>Set in Instrument Serif and Geist. Built with Next.js.</span>
+          <a href="#top" className="focus-ring transition-colors hover:text-primary">
+            Back to top ↑
+          </a>
+        </div>
+      </footer>
+    </>
   );
 }
