@@ -6,7 +6,7 @@ export function Hero() {
       </h1>
       <div className="mt-8 space-y-5 text-lg leading-relaxed text-secondary">
         <p>
-          I&apos;m a third-year computer science student at VIT Chennai. I
+          I&apos;m a computer science student at VIT Chennai. I
           mostly build things around language models: fine-tuning them,
           serving them, and writing the little tools that tell me whether
           they&apos;re actually any good.

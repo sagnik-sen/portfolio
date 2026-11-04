@@ -48,13 +48,6 @@ const PROJECTS = [
     tags: "Flutter, signal processing",
   },
   {
-    name: "Medical AI agent",
-    url: "https://github.com/sagnik-sen/medical-ai-agent",
-    year: "2025",
-    note: "An assistant for doctors, starting with my father, that helps with medical text tasks. Where I first learned RAG, LoRA and QLoRA.",
-    tags: "PyTorch, Hugging Face",
-  },
-  {
     name: "Time Capsule Narrator",
     url: "https://github.com/sagnik-sen/time-capsule-narrator",
     year: "2025",
@@ -75,7 +68,6 @@ const OLDER = [
   { name: "CarbonCred", url: "https://github.com/GryffinX/CarbonCred" },
   { name: "ProjectHub", url: "https://github.com/sagnik-sen/ProjectHub" },
   { name: "IMDB sentiment analysis", url: "https://github.com/sagnik-sen/imdb-sentiment-analysis" },
-  { name: "ML algorithms from scratch", url: "https://github.com/sagnik-sen/Nexus" },
 ];
 
 export function Projects() {
