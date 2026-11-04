@@ -1,4 +1,12 @@
-const PROJECTS = [
+// All site copy lives here. The menu in src/components/menu.tsx renders it.
+
+export const EMAIL = "sen.sagnik9@gmail.com";
+export const GITHUB = "https://github.com/sagnik-sen";
+export const LINKEDIN = "https://www.linkedin.com/in/sagnik-sen-71b848193/";
+
+export type Project = { name: string; url?: string; year: string; note: string; tags: string };
+
+export const PROJECTS: Project[] = [
   {
     name: "Insurance email classifier",
     year: "2026",
@@ -63,52 +71,24 @@ const PROJECTS = [
   },
 ];
 
-const OLDER = [
+export const OLDER = [
   { name: "OpenEscrow", url: "https://github.com/GryffinX/OpenEscrow" },
   { name: "CarbonCred", url: "https://github.com/GryffinX/CarbonCred" },
   { name: "ProjectHub", url: "https://github.com/sagnik-sen/ProjectHub" },
 ];
 
-export function Projects() {
-  return (
-    <section id="work" className="mt-24">
-      <h2 className="font-serif text-3xl text-primary">Things I&apos;ve made</h2>
-      <ul className="mt-8 space-y-8">
-        {PROJECTS.map((p) => (
-          <li key={p.name}>
-            <div className="flex items-baseline justify-between gap-4">
-              <h3 className="text-[17px] text-primary">
-                {p.url ? (
-                  <a href={p.url} className="link">
-                    {p.name}
-                  </a>
-                ) : (
-                  p.name
-                )}
-              </h3>
-              <span className="font-mono text-[13px] text-tertiary">{p.year}</span>
-            </div>
-            <p className="mt-1.5 leading-relaxed text-secondary">{p.note}</p>
-            <p className="mt-1.5 font-mono text-[13px] text-tertiary">{p.tags}</p>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-10 leading-relaxed text-secondary">
-        Also:{" "}
-        {OLDER.map((o, i) => (
-          <span key={o.name}>
-            <a href={o.url} className="link">
-              {o.name}
-            </a>
-            {i < OLDER.length - 1 ? ", " : "."}
-          </span>
-        ))}{" "}
-        Everything else is on{" "}
-        <a href="https://github.com/sagnik-sen" className="link text-primary">
-          GitHub
-        </a>
-        .
-      </p>
-    </section>
-  );
-}
+export const TIMELINE = [
+  { date: "2026", title: "Software Developer Intern", org: "Wizergos" },
+  { date: "2025-now", title: "General Secretary (earlier Marketing Lead)", org: "GDG on Campus VIT Chennai" },
+  { date: "2024-2028", title: "B.Tech, Computer Science", org: "VIT Chennai" },
+];
+
+export const EVENTS = [
+  "DevsHouse '25 (MLH-partnered hackathon)",
+  "Google Solution Challenge 2025",
+  "GenAI Exchange Hackathon",
+  "Flutter Frames",
+  "Google Cloud Arcade 2025",
+];
+
+export const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");

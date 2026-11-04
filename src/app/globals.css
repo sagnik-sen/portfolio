@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base: #121212;
-  --bg-elevated: #181818;
-  --bg-surface: #1e1e1e;
+  --bg-base: #0a0f0a;
+  --bg-elevated: #111a11;
+  --bg-surface: #172417;
 
-  --text-primary: #ededed;
-  --text-secondary: #a3a3a3;
-  --text-tertiary: #808080;
+  --text-primary: #c6f5b0;
+  --text-secondary: #86c76f;
+  --text-tertiary: #6a9f5b;
 
-  --accent: #ff9f43;
-  --accent-soft: #ffcf8a;
+  --accent: #ffb627;
+  --accent-soft: #ffd57a;
 
-  --line: rgba(237, 237, 237, 0.08);
-  --line-strong: rgba(237, 237, 237, 0.14);
+  --line: rgba(134, 199, 111, 0.25);
+  --line-strong: rgba(134, 199, 111, 0.5);
 }
 
 @theme inline {
@@ -31,9 +31,8 @@
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-vt323);
+  --font-pixel: var(--font-press-start);
 }
 
 * {
@@ -41,15 +40,33 @@
 }
 
 html {
-  scroll-behavior: smooth;
-  background: var(--bg-base);
+  background: #050805;
 }
 
+/* Tiled diagonal pattern behind the menu window, like an emulator frontend wallpaper. */
 body {
-  background: var(--bg-base);
+  min-height: 100svh;
   color: var(--text-primary);
   font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+  background:
+    repeating-linear-gradient(45deg, var(--bg-elevated) 0 2px, transparent 2px 10px),
+    #050805;
+}
+
+/* Soft phosphor glow on text inside the window. */
+.crt {
+  text-shadow: 0 0 6px rgba(198, 245, 176, 0.25);
+  box-shadow: 0 0 0 1px #000, 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* CRT scanlines over the whole viewport. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px);
 }
 
 ::selection {
@@ -57,33 +74,18 @@ body {
   color: var(--bg-base);
 }
 
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.blink {
+  animation: blink 1s steps(1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  .blink {
+    animation: none;
   }
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-.link {
-  text-decoration: underline;
-  text-decoration-color: var(--line-strong);
-  text-underline-offset: 4px;
-  transition: color 150ms, text-decoration-color 150ms;
-}
-
-.link:hover {
-  color: var(--text-primary);
-  text-decoration-color: var(--accent);
-}
-
-.link:focus-visible,
-.focus-ring:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-  border-radius: 2px;
 }

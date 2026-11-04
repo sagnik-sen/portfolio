@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Instrument_Serif } from "next/font/google";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 
-const serif = Instrument_Serif({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-instrument-serif",
-});
+const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-press-start" });
+const terminal = VT323({ weight: "400", subsets: ["latin"], variable: "--font-vt323" });
 
 export const metadata: Metadata = {
   title: "Sagnik Sen",
@@ -22,11 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} h-full antialiased`}
-    >
-      <body className="min-h-full">{children}</body>
+    <html lang="en" className={`${pixel.variable} ${terminal.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
