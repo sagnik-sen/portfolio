@@ -22,4 +22,5 @@ Easiest path is Vercel (vercel.com/new) — connect the repo (or run `npx vercel
 
 - src/content.ts — all site copy: projects, timeline, events, links
 - src/components/menu.tsx — the retro menu UI (hash-based screens, keyboard navigation)
+- src/components/retro/ — extras: boot screen, terminal, mobile D-pad, achievements, sounds, pixel icons, themes
 - src/app/ — root layout (fonts, metadata), global styles and color tokens
