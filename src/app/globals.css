@@ -199,6 +199,11 @@ body::after {
   }
 }
 
+/* The phone keyboard needs the room while typing in the terminal. */
+:root:has(#terminal-input:focus) .dpad {
+  display: none;
+}
+
 /* Boot screen: only shown when the inline script in layout.tsx sets data-boot. */
 .boot {
   display: none;

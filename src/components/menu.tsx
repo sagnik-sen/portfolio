@@ -18,15 +18,16 @@ import {
   slug,
   type Entry,
 } from "@/content";
-import { Toast, TrophyList, unlock } from "./retro/achievements";
+import { TrophyList, unlock } from "./retro/achievements";
 import { Boot } from "./retro/boot";
 import { CartridgeOverlay, openExternal } from "./retro/cartridge";
-import { DPad } from "./retro/dpad";
+import { DPad, padOn } from "./retro/dpad";
 import { PixelIcon, type IconName } from "./retro/icons";
 import { blip, soundOn } from "./retro/sound";
 import { createStore, useStore, type Store } from "./retro/store";
 import { Terminal } from "./retro/terminal";
 import { setTheme, THEMES, useTheme } from "./retro/theme";
+import { notify, Toast } from "./retro/toast";
 
 const PROJECT_ICONS: Record<string, IconName> = {
   "insurance-email-classifier": "mail",
@@ -66,7 +67,21 @@ const readClock = () => {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
 
-type Screen = { title: string; parent?: string; body: ReactNode };
+// jsOnly screens need JavaScript to work, so the no-JS fallback hides them.
+type Screen = { title: string; parent?: string; jsOnly?: boolean; body: ReactNode };
+
+// Set when Prev/Next is used, so the cursor lands on the same control on the
+// next project and repeated Enter keeps paging in that direction.
+let lastNav: "prev" | "next" | undefined;
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    notify("LINK COPIED");
+  } catch {
+    notify(`COPY THIS LINK: ${window.location.href}`);
+  }
+}
 
 // A menu entry: a link when given href, otherwise a button that runs onSelect.
 function Item({
@@ -77,7 +92,9 @@ function Item({
   value,
   back,
   icon,
+  nav,
 }: {
+  nav?: "prev" | "next";
   icon?: ReactNode;
   href?: string;
   onSelect?: () => void;
@@ -90,6 +107,7 @@ function Item({
   const shared = {
     "data-item": true,
     "data-back": back || undefined,
+    "data-nav": nav,
     onPointerEnter: (e: PointerEvent<HTMLElement>) =>
       e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true }),
     className:
@@ -122,6 +140,7 @@ function Item({
           rel={external ? "noreferrer" : undefined}
           onClick={(e) => {
             blip(back ? "back" : "select");
+            lastNav = nav;
             if (external) openExternal(e, label);
           }}
           {...shared}
@@ -327,6 +346,7 @@ const screens: Record<string, Screen> = {
   settings: {
     title: "Settings",
     parent: "",
+    jsOnly: true,
     body: (
       <>
         <Text>Display palette. Your choice is saved in this browser.</Text>
@@ -360,16 +380,19 @@ const screens: Record<string, Screen> = {
   trophies: {
     title: "Trophies",
     parent: "",
+    jsOnly: true,
     body: <TrophyList />,
   },
   terminal: {
     title: "Terminal",
     parent: "",
+    jsOnly: true,
     body: <Terminal />,
   },
   cheats: {
     title: "Cheats",
     parent: "",
+    jsOnly: true,
     body: (
       <>
         <Text>CHEATS ENABLED. You know the code, respect.</Text>
@@ -392,7 +415,7 @@ const screens: Record<string, Screen> = {
     ),
   },
   ...Object.fromEntries(
-    PROJECTS.map((p) => [
+    PROJECTS.map((p, i) => [
       `projects/${slug(p.name)}`,
       {
         title: p.name,
@@ -405,7 +428,16 @@ const screens: Record<string, Screen> = {
             <p className="mb-5 px-1 text-tertiary">
               <span className="text-secondary">tools</span> {p.tags}
             </p>
-            <ul>{p.url ? <Item href={p.url} label="Open on GitHub" /> : null}</ul>
+            <ul>
+              {p.url && <Item href={p.url} label="Open on GitHub" />}
+              <Item label="Copy link to this project" onSelect={() => void copyLink()} />
+              {PROJECTS[i + 1] && (
+                <Item href={`#projects/${slug(PROJECTS[i + 1].name)}`} label={`Next: ${PROJECTS[i + 1].name}`} nav="next" />
+              )}
+              {PROJECTS[i - 1] && (
+                <Item href={`#projects/${slug(PROJECTS[i - 1].name)}`} label={`Prev: ${PROJECTS[i - 1].name}`} nav="prev" />
+              )}
+            </ul>
           </>
         ),
       },
@@ -436,13 +468,31 @@ function StatusBar() {
   );
 }
 
+const screenKey = (hash: string) => (Object.hasOwn(screens, hash) ? hash : "");
+// Read at key-press time: the URL changes before React re-renders, and fast
+// key presses must act on the screen in the address bar, not the last render.
+const liveKey = () => screenKey(readHash());
+
 export function Menu() {
   const hash = useSyncExternalStore(subscribeHash, readHash, () => "");
-  const key = Object.hasOwn(screens, hash) ? hash : "";
+  const key = screenKey(hash);
   const screen = screens[key];
   const root = useRef<HTMLDivElement>(null);
   const prev = useRef<string | null>(null);
   const konami = useRef(0);
+  const pad = useStore(padOn);
+
+  // A hello for anyone who opens the browser console.
+  useEffect(() => {
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent");
+    console.log(
+      "%c┌───────────────────────┐\n│  SAGNIK-OS  v2026.11  │\n└───────────────────────┘",
+      `color: ${accent}; font-family: monospace`,
+    );
+    console.log(
+      "Hi, fellow developer. Press ~ for a terminal, or try a certain old cheat code.\nSource: https://github.com/sagnik-sen/portfolio",
+    );
+  }, []);
 
   // Tracks the Konami code. Returns true when the key belongs to the code's
   // left/right/B/A tail, so it doesn't also open or leave a screen.
@@ -465,7 +515,10 @@ export function Menu() {
   // Put the cursor on the entry you came back from, or the first entry.
   useEffect(() => {
     const list = items().filter((el) => !el.dataset.back);
-    const from = list.find((el) => el.getAttribute("href") === `#${prev.current}`);
+    const from = lastNav
+      ? list.find((el) => el.dataset.nav === lastNav)
+      : list.find((el) => el.getAttribute("href") === `#${prev.current}`);
+    lastNav = undefined;
     const input = root.current?.querySelector<HTMLElement>("section:not([hidden]) input");
     (from ?? input ?? list[0] ?? items()[0])?.focus({ preventScroll: true });
     prev.current = key;
@@ -485,7 +538,7 @@ export function Menu() {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // While typing in the terminal, only Escape is ours.
       if (e.target instanceof HTMLInputElement) {
-        if (e.key === "Escape") window.location.hash = screen.parent ?? "";
+        if (e.key === "Escape") window.location.hash = screens[liveKey()].parent ?? "";
         return;
       }
       if ((e.key === "`" || e.key === "~") && letterKeys.get()) {
@@ -516,16 +569,17 @@ export function Menu() {
       } else if (action === "open" && i >= 0) {
         e.preventDefault();
         list[i].click();
-      } else if (action === "back" && screen.parent !== undefined) {
-        go(screen.parent);
-      } else if (action === "home" && key !== "") {
+      } else if (action === "back" && screens[liveKey()].parent !== undefined) {
+        go(screens[liveKey()].parent!);
+      } else if (action === "home" && liveKey() !== "") {
         go("");
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // Attached once: everything it reads is live (refs, the URL, the DOM).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, []);
 
   const trail: string[] = [];
   for (let k: string | undefined = key; k !== undefined; k = screens[k].parent) {
@@ -538,7 +592,7 @@ export function Menu() {
       <Toast />
       <CartridgeOverlay />
       <DPad />
-      <div className="flex min-h-svh items-start justify-center p-3 pb-40 sm:p-6 md:items-center md:p-10">
+      <div className={`flex min-h-svh items-start justify-center p-3 sm:p-6 md:items-center md:p-10 ${pad ? "pb-36" : "pb-16"}`}>
         <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
           <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
             <h1>SAGNIK SEN</h1>
@@ -550,7 +604,7 @@ export function Menu() {
               {screen.title}
             </p>
             {Object.entries(screens).map(([k, s]) => (
-              <section key={k} hidden={k !== key}>
+              <section key={k} id={k || undefined} hidden={k !== key} data-js-only={s.jsOnly || undefined}>
                 <Heading>{k === key ? trail.join(" › ") : s.title}</Heading>
                 {s.parent !== undefined && (
                   <ul className="mb-4">
