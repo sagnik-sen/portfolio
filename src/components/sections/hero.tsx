@@ -1,31 +1,34 @@
-const FACTS = [
-  { label: "Now", value: "B.Tech Computer Science, VIT Chennai (2024–2028)" },
-  { label: "Previously", value: "Software Developer Intern, Wizergos" },
-  { label: "Also", value: "General Secretary, GDG on Campus VIT Chennai" },
-  { label: "Based in", value: "Chennai, India" },
-];
-
 export function Hero() {
   return (
-    <section id="top" className="mx-auto max-w-6xl px-6 pb-20 pt-20 md:px-10 md:pb-28 md:pt-32">
-      <h1 className="font-serif text-[4.5rem] leading-[0.9] tracking-tight text-primary sm:text-8xl md:text-[9rem]">
-        Sagnik Sen
+    <section id="top" className="pt-16 md:pt-24">
+      <h1 className="font-serif text-5xl text-primary md:text-6xl">
+        Hi, I&apos;m Sagnik.
       </h1>
-
-      <p className="mt-10 max-w-2xl text-xl leading-relaxed text-secondary md:text-2xl md:leading-relaxed">
-        I&apos;m a computer science student who works on applied machine
-        learning, mostly language models: <span className="text-primary">fine-tuning
-        them, serving them, and checking whether they&apos;re any good</span>.
-      </p>
-
-      <dl className="mt-14 grid gap-x-8 gap-y-4 text-[15px] sm:grid-cols-2 md:mt-20">
-        {FACTS.map((f) => (
-          <div key={f.label} className="flex gap-4 border-t border-line pt-4">
-            <dt className="w-24 shrink-0 font-mono text-[13px] text-tertiary">{f.label}</dt>
-            <dd className="text-secondary">{f.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="mt-8 space-y-5 text-lg leading-relaxed text-secondary">
+        <p>
+          I&apos;m a third-year computer science student at VIT Chennai. I
+          mostly build things around language models: fine-tuning them,
+          serving them, and writing the little tools that tell me whether
+          they&apos;re actually any good.
+        </p>
+        <p>
+          This past summer I got to do that for real as an intern at{" "}
+          <span className="text-primary">Wizergos</span>, where I worked on an
+          LLM system that sorts incoming insurance email. Outside class I run{" "}
+          <a href="#community" className="link text-primary">
+            GDG on Campus at VIT Chennai
+          </a>
+          .
+        </p>
+        <p>
+          Lately I&apos;ve been designing{" "}
+          <a href="https://github.com/sagnik-sen/atlas" className="link text-primary">
+            Atlas
+          </a>
+          , an idea for turning a codebase into facts that people and AI agents
+          can reason about.
+        </p>
+      </div>
     </section>
   );
 }

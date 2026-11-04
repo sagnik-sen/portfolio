@@ -1,28 +1,24 @@
+export const EMAIL = "sen.sagnik9@gmail.com";
+
 const LINKS = [
-  { href: "#work", label: "Work" },
-  { href: "#experience", label: "Experience" },
-  { href: "#contact", label: "Contact" },
+  { href: "https://github.com/sagnik-sen", label: "GitHub" },
+  { href: "https://www.linkedin.com/in/sagnik-sen-71b848193/", label: "LinkedIn" },
+  { href: `mailto:${EMAIL}`, label: "Email" },
 ];
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-50 bg-base/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 md:px-10">
-        <a href="#top" className="focus-ring text-sm text-primary">
-          Sagnik Sen
-        </a>
-        <nav className="flex gap-5 md:gap-8">
-          {LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="focus-ring text-[13px] text-secondary transition-colors hover:text-primary"
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
-      </div>
+    <header className="flex items-baseline justify-between py-8 text-[15px]">
+      <a href="#top" className="focus-ring text-primary">
+        Sagnik Sen
+      </a>
+      <nav className="flex gap-5 text-secondary">
+        {LINKS.map((l) => (
+          <a key={l.label} href={l.href} className="link">
+            {l.label}
+          </a>
+        ))}
+      </nav>
     </header>
   );
 }
