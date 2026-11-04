@@ -4,83 +4,144 @@ export const EMAIL = "sen.sagnik9@gmail.com";
 export const GITHUB = "https://github.com/sagnik-sen";
 export const LINKEDIN = "https://www.linkedin.com/in/sagnik-sen-71b848193/";
 
-export type Project = { name: string; url?: string; year: string; note: string; tags: string };
+export const INTRO =
+  "Hi, I'm Sagnik, a computer science student at VIT Chennai. I build things around language models and the tools that measure them. This past summer I interned at Wizergos in Bengaluru, where I fine-tuned a small model to sort insurance email. On campus I'm General Secretary of GDG on Campus VIT Chennai and Programme Representative for B.Tech CSE.";
+
+export type Project = {
+  name: string;
+  year: string;
+  context: string;
+  note: string;
+  facts?: string[];
+  tags: string;
+  url?: string;
+};
 
 export const PROJECTS: Project[] = [
   {
     name: "Insurance email classifier",
     year: "2026",
-    note: "Internship at Wizergos. Prompt design, vLLM serving on Gemma, LoRA/QLoRA fine-tuning on an A30, and an evaluation pipeline to score every change. The code is private.",
-    tags: "vLLM, Gemma, Unsloth, TRL",
+    context: "Internship at Wizergos. Code is private.",
+    note: "I fine-tuned a small Gemma model with QLoRA to sort insurance customer emails into seven categories, replacing a long prompt with trained weights. I cleaned about 10k labelled emails and ran a numbered series of experiments on rank, epochs and RS-LoRA. One early result of 35% turned out to be a mismatch between training and evaluation prompt formats, not failed training.",
+    facts: [
+      "94.4% accuracy on 693 held-out emails",
+      "37% for the same model before fine-tuning",
+      "3,157 duplicate rows removed from the training data",
+    ],
+    tags: "Gemma, Unsloth, QLoRA, TRL, PyTorch, NVIDIA A30",
   },
   {
-    name: "promptcheck",
-    url: "https://github.com/sagnik-sen/promptcheck",
+    name: "UrbanPulse Chennai",
     year: "2026",
-    note: "A small CLI that scores LLM classification runs from a CSV of predictions and saves each run as JSON, so prompt versions can be compared and diffed.",
-    tags: "Python, scikit-learn",
-  },
-  {
-    name: "traise",
-    url: "https://github.com/sagnik-sen/traise",
-    year: "2026",
-    note: "Runs an AI coding agent against the same repo task many times, grades each attempt with the repo's tests, and aggregates the results.",
-    tags: "Python",
+    context: "Smart-cities course project, with Ayush Gupta. Code is private.",
+    note: "A flood-response prototype for Chennai: a staff command center, an offline Tamil/English citizen app, and an audit log sealed on the Shardeum testnet so later edits can be detected. It forecasts water levels, predicts heavy rain with XGBoost trained on 25 years of ERA5 weather data, and assigns evacuees to shelters with min-cost max-flow over real road routes. Sensors and shelters are simulated; the weather data, roads, ward map and blockchain anchoring are real.",
+    facts: [
+      "0% of evacuees left without a bed, vs 31.7% for nearest-shelter (1,600 simulated runs)",
+      "200/200 tampering attempts on sealed records detected, no false alarms",
+      "6 ms per update across all 200 city wards",
+    ],
+    tags: "Node.js, React, Solidity, XGBoost, OSRM",
   },
   {
     name: "Atlas",
-    url: "https://github.com/sagnik-sen/atlas",
     year: "2026",
-    note: "Design work, plus a throwaway prototype, for turning a repository into a typed, provenance-tracked fact base you can query, with a graph as one view of it.",
-    tags: "TypeScript, ts-morph",
+    context: "Design work plus a throwaway prototype.",
+    note: "A design for turning a repository into typed facts (declarations, calls, imports) with source tracking, so people and AI agents can ask questions like \"what calls this, directly or indirectly?\". I tested it with a TypeScript extractor against the Zod library and its git history, and wrote up what the measurements showed, including bugs in my own extractor that I had first mistaken for findings.",
+    facts: [
+      "Call resolution raised from 16.6% to 96.6% on Zod (~30k lines)",
+      "132 files indexed into ~34k facts in about 3 seconds",
+      "389 commits of history extracted to test stable IDs",
+    ],
+    tags: "TypeScript, ts-morph, Node.js",
+    url: "https://github.com/sagnik-sen/atlas",
+  },
+  {
+    name: "traise",
+    year: "2026",
+    context: "Personal project.",
+    note: "A harness that runs Claude Code on a small task repo many times and grades each run by its test command, failing any run that edits the tests. Every run is saved as JSON with cost, turns, files changed and a simplified tool sequence, and a compare command shows how two runs reached their results differently. The bundled tasks include an impossible one and a real bug planted in pallets/itsdangerous.",
+    tags: "Python, Claude Code CLI, unittest",
+    url: "https://github.com/sagnik-sen/traise",
   },
   {
     name: "Ephemera",
-    url: "https://github.com/sagnik-sen/ephemera",
     year: "2026",
-    note: "Temporary file sharing. Upload a file, pick how long it lives, share the link. A scheduled Lambda deletes it from S3 when time is up.",
-    tags: "FastAPI, AWS",
+    context: "Cloud course project.",
+    note: "File sharing where every link expires, from 2 minutes to 7 days. Browsers upload and download straight to a private S3 bucket through presigned URLs locked to the file's size and type, and a Lambda on a 5-minute schedule deletes expired files using a sparse DynamoDB index. I also wrote scripts to provision, verify and tear down the whole stack.",
+    facts: ["16 of 17 end-to-end checks passed against the live AWS deployment"],
+    tags: "AWS, FastAPI, DynamoDB, Lambda, React",
+    url: "https://github.com/sagnik-sen/ephemera",
   },
   {
     name: "GDGdex",
-    url: "https://github.com/sagnik-sen/GDGdex",
     year: "2026",
-    note: "An icebreaker game for our GDG meetups: scan people's QR codes to collect them, with a live leaderboard on the projector.",
-    tags: "Flutter, Dart, SQLite",
+    context: "Built for a GDG on Campus meetup.",
+    note: "An icebreaker game: meet someone, scan their QR code, and they join your collection. Most people collected wins. The database enforces the rules itself, so duplicate or self-collection is impossible even with concurrent requests, and there's an admin dashboard, a projector leaderboard and automatic backups.",
+    facts: ["Tuned for a 180-person newcomer meetup"],
+    tags: "Flutter, Dart, SQLite, Docker",
+    url: "https://github.com/sagnik-sen/GDGdex",
   },
   {
     name: "PulseGuard",
-    url: "https://github.com/Dhyankannoth/daansATD",
     year: "2026",
-    note: "Hackathon team project. A phone-only early-warning app for anaphylaxis that reads your pulse from the camera and watches for deviations from your own baseline.",
-    tags: "Flutter, signal processing",
+    context: "VMedithon 3.0 hackathon, team Hack Daniels.",
+    note: "A phone app that reads heart rate, HRV and breathing from a fingertip over the camera and flags anaphylaxis risk when several body systems drift from your own baseline at once. My part was the ML side: the baseline and deviation engine and the tree models (Isolation Forest, Random Forest, gradient boosting), which I ported to Dart so they run on the phone. The models are trained on synthetic data for now.",
+    tags: "Flutter, Dart, scikit-learn, signal processing",
+    url: "https://github.com/Dhyankannoth/daansATD",
   },
   {
-    name: "Time Capsule Narrator",
-    url: "https://github.com/sagnik-sen/time-capsule-narrator",
-    year: "2025",
-    note: "Turns a written memory into a short narrated audio piece.",
-    tags: "IBM watsonx, Bark TTS",
+    name: "OpenEscrow",
+    year: "2026",
+    context: "Defy '26 hackathon. I was team lead.",
+    note: "A milestone-based escrow app. A Solidity contract on the Shardeum testnet locks the buyer's funds and releases them to the seller as each milestone is approved, and a dispute freezes whatever is left. The React frontend connects through MetaMask.",
+    tags: "Solidity, Shardeum, React, ethers.js",
+    url: "https://github.com/GryffinX/OpenEscrow",
   },
   {
-    name: "AI Personal Coach",
-    url: "https://github.com/sagnik-sen/ai-personal-coach",
-    year: "2025",
-    note: "My GenAI capstone: a coaching app that grounds its answers in a small knowledge base.",
-    tags: "Streamlit, watsonx, RAG",
+    name: "promptcheck",
+    year: "2026",
+    context: "Personal project.",
+    note: "A small CLI that scores an LLM classifier's predictions from a CSV (accuracy plus weighted precision, recall and F1) and saves each run as numbered JSON, so prompt versions can be diffed or committed. It has strict typing, tests and CI.",
+    tags: "Python, Typer, scikit-learn, pytest",
+    url: "https://github.com/sagnik-sen/promptcheck",
   },
 ];
 
 export const OLDER = [
-  { name: "OpenEscrow", url: "https://github.com/GryffinX/OpenEscrow" },
-  { name: "CarbonCred", url: "https://github.com/GryffinX/CarbonCred" },
-  { name: "ProjectHub", url: "https://github.com/sagnik-sen/ProjectHub" },
+  { name: "AI Personal Coach (GenAI capstone)", url: "https://github.com/sagnik-sen/ai-personal-coach" },
+  { name: "ProjectHub (web programming course)", url: "https://github.com/sagnik-sen/ProjectHub" },
+  { name: "CarbonCred (hackathon team)", url: "https://github.com/GryffinX/CarbonCred" },
 ];
 
-export const TIMELINE = [
-  { date: "2026", title: "Software Developer Intern", org: "Wizergos" },
-  { date: "2025-now", title: "General Secretary (earlier Marketing Lead)", org: "GDG on Campus VIT Chennai" },
-  { date: "2024-2028", title: "B.Tech, Computer Science", org: "VIT Chennai" },
+export type Entry = { date: string; title: string; org: string; note?: string };
+
+export const EXPERIENCE: Entry[] = [
+  {
+    date: "May-Jul 2026",
+    title: "Software Engineer Intern",
+    org: "Wizergos, Bengaluru",
+    note: "Fine-tuned a small LLM to classify insurance email: 94.4% on held-out data, up from 37%.",
+  },
+  { date: "Aug 2026-now", title: "Programme Representative, B.Tech CSE", org: "VIT Chennai" },
+  { date: "Jun 2026-now", title: "General Secretary", org: "GDG on Campus VIT Chennai" },
+  { date: "Jul 2025-now", title: "Competitive Programming Team", org: "CodeChef VIT Chennai" },
+];
+
+export const GDG_ROLES: Entry[] = [
+  { date: "Jun 2026-now", title: "General Secretary", org: "GDG on Campus VIT Chennai" },
+  { date: "Jun 2025-Jul 2026", title: "Marketing Lead", org: "GDG on Campus VIT Chennai" },
+  { date: "Dec 2024-Jul 2026", title: "Social Media Manager", org: "GDG on Campus VIT Chennai" },
+  { date: "Dec 2024-Jun 2025", title: "Marketing Team", org: "GDG on Campus VIT Chennai" },
+];
+
+export const EDUCATION: Entry[] = [
+  { date: "2024-2028", title: "B.Tech, Computer Science", org: "VIT Chennai", note: "CGPA 9.14" },
+  { date: "2011-2022", title: "School", org: "St. Michael's School, Siliguri", note: "99.2%" },
+];
+
+export const CERTIFICATIONS: Entry[] = [
+  { date: "Jan 2026", title: "Blockchain Basics", org: "Cyfrin Updraft" },
+  { date: "Jun 2025", title: "Generative AI using IBM watsonx", org: "IBM Career Education Program" },
 ];
 
 export const EVENTS = [

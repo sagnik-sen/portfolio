@@ -2,14 +2,19 @@
 
 import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import {
+  CERTIFICATIONS,
+  EDUCATION,
   EMAIL,
   EVENTS,
+  EXPERIENCE,
+  GDG_ROLES,
   GITHUB,
+  INTRO,
   LINKEDIN,
   OLDER,
   PROJECTS,
-  TIMELINE,
   slug,
+  type Entry,
 } from "@/content";
 
 // The open screen lives in the URL hash ("#projects", "#projects/atlas"), so
@@ -80,21 +85,48 @@ const Text = ({ children }: { children: ReactNode }) => (
   <p className="mb-5 text-secondary">{children}</p>
 );
 
+const Subheading = ({ children }: { children: ReactNode }) => (
+  <h3 className="mb-2 mt-6 px-1 text-tertiary first:mt-0">── {children} ──</h3>
+);
+
+const Bullets = ({ items }: { items: string[] }) => (
+  <ul className="mb-5 px-1 text-primary">
+    {items.map((item) => (
+      <li key={item}>
+        <span className="text-tertiary">- </span>
+        {item}
+      </li>
+    ))}
+  </ul>
+);
+
+function Timeline({ entries }: { entries: Entry[] }) {
+  return (
+    <ul className="mb-2 space-y-3">
+      {entries.map((e) => (
+        <li key={e.date + e.title} className="grid px-1 sm:grid-cols-[10rem_1fr] sm:gap-4">
+          <span className="text-accent">{e.date}</span>
+          <span className="text-primary">
+            {e.title}
+            <span className="text-secondary">, {e.org}</span>
+            {e.note && <span className="block text-secondary">{e.note}</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const screens: Record<string, Screen> = {
   "": {
     title: "Main Menu",
     body: (
       <>
-        <Text>
-          Hi, I&apos;m Sagnik, a computer science student at VIT Chennai. I
-          build things around language models: fine-tuning them, serving them,
-          and writing the little tools that tell me whether they&apos;re any
-          good. This past summer I interned at Wizergos on an LLM system that
-          sorts insurance email.
-        </Text>
+        <Text>{INTRO}</Text>
         <ul>
           <Item href="#projects" label="Projects" value={String(PROJECTS.length)} />
-          <Item href="#experience" label="Work & school" value={String(TIMELINE.length)} />
+          <Item href="#experience" label="Experience" value={String(EXPERIENCE.length)} />
+          <Item href="#education" label="Education" />
           <Item href="#community" label="Community" />
           <Item href="#contact" label="Contact" />
         </ul>
@@ -120,20 +152,19 @@ const screens: Record<string, Screen> = {
     ),
   },
   experience: {
-    title: "Work & school",
+    title: "Experience",
+    parent: "",
+    body: <Timeline entries={EXPERIENCE} />,
+  },
+  education: {
+    title: "Education",
     parent: "",
     body: (
-      <ul className="space-y-3">
-        {TIMELINE.map((t) => (
-          <li key={t.title} className="grid px-1 sm:grid-cols-[8rem_1fr] sm:gap-4">
-            <span className="text-accent">{t.date}</span>
-            <span className="text-primary">
-              {t.title}
-              <span className="text-secondary">, {t.org}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
+      <>
+        <Timeline entries={EDUCATION} />
+        <Subheading>certifications</Subheading>
+        <Timeline entries={CERTIFICATIONS} />
+      </>
     ),
   },
   community: {
@@ -142,18 +173,13 @@ const screens: Record<string, Screen> = {
     body: (
       <>
         <Text>
-          I&apos;m General Secretary of Google Developer Groups on Campus at VIT
-          Chennai: planning events, keeping teams in sync and sorting out
-          logistics. Programs I&apos;ve helped run:
+          I&apos;ve been part of Google Developer Groups on Campus at VIT Chennai
+          since December 2024, starting on the marketing team. These days I
+          plan events, keep teams in sync and sort out logistics.
         </Text>
-        <ul className="mb-5 px-1 text-primary">
-          {EVENTS.map((e) => (
-            <li key={e}>
-              <span className="text-tertiary">- </span>
-              {e}
-            </li>
-          ))}
-        </ul>
+        <Timeline entries={GDG_ROLES} />
+        <Subheading>programs I&apos;ve helped run</Subheading>
+        <Bullets items={EVENTS} />
         <ul>
           <Item href={`#projects/${slug("GDGdex")}`} label="GDGdex, the meetup game I built" />
         </ul>
@@ -182,10 +208,10 @@ const screens: Record<string, Screen> = {
         parent: "projects",
         body: (
           <>
+            <p className="mb-3 px-1 text-tertiary">{p.context}</p>
             <Text>{p.note}</Text>
+            {p.facts && <Bullets items={p.facts} />}
             <p className="mb-5 px-1 text-tertiary">
-              <span className="text-secondary">year</span> {p.year}
-              <br />
               <span className="text-secondary">tools</span> {p.tags}
             </p>
             <ul>{p.url ? <Item href={p.url} label="Open on GitHub" /> : null}</ul>
