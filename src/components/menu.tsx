@@ -24,7 +24,7 @@ import { CartridgeOverlay, openExternal } from "./retro/cartridge";
 import { DPad } from "./retro/dpad";
 import { PixelIcon, type IconName } from "./retro/icons";
 import { blip, soundOn } from "./retro/sound";
-import { createStore, useStore } from "./retro/store";
+import { createStore, useStore, type Store } from "./retro/store";
 import { Terminal } from "./retro/terminal";
 import { setTheme, THEMES, useTheme } from "./retro/theme";
 
@@ -59,8 +59,12 @@ const subscribeClock = (cb: () => void) => {
   const id = setInterval(cb, 10_000);
   return () => clearInterval(id);
 };
-const readClock = () =>
-  new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+// Plain string formatting: toLocaleTimeString spins up Intl, which costs
+// ~100 ms on a slow phone and runs on every snapshot read.
+const readClock = () => {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
 
 type Screen = { title: string; parent?: string; body: ReactNode };
 
@@ -161,24 +165,46 @@ function ThemeList() {
   );
 }
 
-function SoundToggle() {
-  const on = useStore(soundOn);
+function Toggle({ store, label, onEnable }: { store: Store<boolean>; label: string; onEnable?: () => void }) {
+  const on = useStore(store);
   return (
-    <ul>
-      <Item
-        label="Menu sounds"
-        value={on ? "[on]" : "[off]"}
-        pressed={on}
-        onSelect={() => {
-          soundOn.set(!on);
-          if (!on) unlock("dj");
-        }}
-      />
-    </ul>
+    <Item
+      label={label}
+      value={on ? "[on]" : "[off]"}
+      pressed={on}
+      onSelect={() => {
+        store.set(!on);
+        if (!on) onEnable?.();
+      }}
+    />
   );
 }
 
-const KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
+// Single-letter shortcuts can be switched off (WCAG 2.1.4), e.g. for speech input.
+const letterKeys = createStore("letter-keys", true);
+
+type Action = "up" | "down" | "open" | "back" | "home";
+
+// What each key does, and which Konami steps it can count as. The D-pad sends
+// "gamepada"/"gamepadb" so its face buttons don't collide with the A/B letters.
+const KEYS: Record<string, { action?: Action; codes?: string[]; letter?: boolean }> = {
+  arrowup: { action: "up", codes: ["up"] },
+  arrowdown: { action: "down", codes: ["down"] },
+  arrowleft: { action: "back", codes: ["left"] },
+  arrowright: { action: "open", codes: ["right"] },
+  escape: { action: "back" },
+  backspace: { action: "back" },
+  w: { action: "up", codes: ["up"], letter: true },
+  s: { action: "down", codes: ["down"], letter: true },
+  a: { action: "back", codes: ["left", "a"], letter: true },
+  d: { action: "open", codes: ["right"], letter: true },
+  q: { action: "home", letter: true },
+  b: { action: "back", codes: ["b"], letter: true },
+  gamepada: { action: "open", codes: ["a"] },
+  gamepadb: { action: "back", codes: ["b"] },
+};
+
+const KONAMI = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"];
 
 const Heading = ({ children }: { children: ReactNode }) => (
   <h2 className="mb-5 font-pixel text-[11px] uppercase leading-relaxed text-accent md:text-xs">
@@ -305,8 +331,11 @@ const screens: Record<string, Screen> = {
       <>
         <Text>Display palette. Your choice is saved in this browser.</Text>
         <ThemeList />
-        <Subheading>audio</Subheading>
-        <SoundToggle />
+        <Subheading>audio & controls</Subheading>
+        <ul>
+          <Toggle store={soundOn} label="Menu sounds" onEnable={() => unlock("dj")} />
+          <Toggle store={letterKeys} label="Letter keys (WASD, Q, B, ~)" />
+        </ul>
         <p className="mt-6 px-1 text-tertiary">psst: old cheat codes still work here.</p>
       </>
     ),
@@ -386,7 +415,9 @@ const screens: Record<string, Screen> = {
 
 // Handheld-console style status icons. The theme name doubles as a hint that
 // palettes can be changed.
-function StatusBar({ clock }: { clock: string }) {
+// Owns the clock so its ticks re-render only the status bar, not every screen.
+function StatusBar() {
+  const clock = useSyncExternalStore(subscribeClock, readClock, () => "--:--");
   const current = useTheme();
   const theme = THEMES.find((t) => t.id === current)?.label;
   const sound = useStore(soundOn);
@@ -407,7 +438,6 @@ function StatusBar({ clock }: { clock: string }) {
 
 export function Menu() {
   const hash = useSyncExternalStore(subscribeHash, readHash, () => "");
-  const clock = useSyncExternalStore(subscribeClock, readClock, () => "--:--");
   const key = Object.hasOwn(screens, hash) ? hash : "";
   const screen = screens[key];
   const root = useRef<HTMLDivElement>(null);
@@ -416,9 +446,9 @@ export function Menu() {
 
   // Tracks the Konami code. Returns true when the key belongs to the code's
   // left/right/B/A tail, so it doesn't also open or leave a screen.
-  const advanceKonami = (k: string) => {
-    if (k === KONAMI[konami.current]) konami.current += 1;
-    else konami.current = k === KONAMI[0] ? 1 : 0;
+  const advanceKonami = (codes: string[]) => {
+    if (codes.includes(KONAMI[konami.current])) konami.current += 1;
+    else konami.current = codes.includes(KONAMI[0]) ? 1 : 0;
     if (konami.current === KONAMI.length) {
       konami.current = 0;
       window.location.hash = "cheats";
@@ -437,7 +467,7 @@ export function Menu() {
     const list = items().filter((el) => !el.dataset.back);
     const from = list.find((el) => el.getAttribute("href") === `#${prev.current}`);
     const input = root.current?.querySelector<HTMLElement>("section:not([hidden]) input");
-    (from ?? input ?? list[0])?.focus({ preventScroll: true });
+    (from ?? input ?? list[0] ?? items()[0])?.focus({ preventScroll: true });
     prev.current = key;
     window.scrollTo(0, 0);
 
@@ -458,31 +488,38 @@ export function Menu() {
         if (e.key === "Escape") window.location.hash = screen.parent ?? "";
         return;
       }
-      if (e.key === "`" || e.key === "~") {
+      if ((e.key === "`" || e.key === "~") && letterKeys.get()) {
         e.preventDefault();
         window.location.hash = "terminal";
         return;
       }
-      const k = e.key.toLowerCase();
-      if (advanceKonami(k)) {
+      const input = KEYS[e.key.toLowerCase()];
+      if (!input) return;
+      if (advanceKonami(input.codes ?? [])) {
         e.preventDefault();
         return;
       }
+      const action = input.letter && !letterKeys.get() ? undefined : input.action;
       const list = items();
       const i = list.indexOf(document.activeElement as HTMLElement);
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      const go = (hash: string) => {
         e.preventDefault();
-        const step = e.key === "ArrowDown" ? 1 : -1;
+        blip("back");
+        window.location.hash = hash;
+      };
+      if (action === "up" || action === "down") {
+        e.preventDefault();
+        const step = action === "down" ? 1 : -1;
         const next = i < 0 ? (step > 0 ? 0 : list.length - 1) : (i + step + list.length) % list.length;
         list[next]?.focus();
         blip("move");
-      } else if ((e.key === "ArrowRight" || k === "a") && i >= 0) {
+      } else if (action === "open" && i >= 0) {
         e.preventDefault();
         list[i].click();
-      } else if (["escape", "arrowleft", "backspace", "b"].includes(k) && screen.parent !== undefined) {
-        e.preventDefault();
-        blip("back");
-        window.location.hash = screen.parent;
+      } else if (action === "back" && screen.parent !== undefined) {
+        go(screen.parent);
+      } else if (action === "home" && key !== "") {
+        go("");
       }
     };
     window.addEventListener("keydown", onKey);
@@ -505,7 +542,7 @@ export function Menu() {
         <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
           <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
             <h1>SAGNIK SEN</h1>
-            <StatusBar clock={clock} />
+            <StatusBar />
           </header>
 
           <main className="min-h-[65svh] px-4 py-6 text-[22px] leading-snug md:px-8 md:py-8 md:text-2xl">
@@ -526,7 +563,7 @@ export function Menu() {
           </main>
 
           <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
-            <span className="hidden sm:inline">↑↓ select · enter/A open · esc/B back · ~ terminal</span>
+            <span className="hidden sm:inline">↑↓/WS move · →/D open · ←/A back · Q menu · ~ terminal</span>
             <span className="sm:hidden">tap or use the pad · ~ terminal</span>
             <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
           </footer>

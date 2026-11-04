@@ -29,8 +29,8 @@ export function DPad() {
         <Pad k="ArrowDown" label="Down" className="col-start-2 row-start-3">▼</Pad>
       </div>
       <div className="flex gap-4">
-        <Pad k="b" label="B: back" className="rounded-full">B</Pad>
-        <Pad k="a" label="A: open" className="-mt-6 rounded-full">A</Pad>
+        <Pad k="GamepadB" label="B: back" className="rounded-full">B</Pad>
+        <Pad k="GamepadA" label="A: open" className="-mt-6 rounded-full">A</Pad>
       </div>
     </div>
   );

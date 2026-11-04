@@ -48,7 +48,7 @@ export function createStore<T>(key: string | null, fallback: T) {
   };
 }
 
-type Store<T> = ReturnType<typeof createStore<T>>;
+export type Store<T> = ReturnType<typeof createStore<T>>;
 
 export const useStore = <T,>(store: Store<T>) =>
   useSyncExternalStore(store.subscribe, store.get, () => store.fallback);
