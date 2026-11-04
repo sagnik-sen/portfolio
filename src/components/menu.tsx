@@ -59,7 +59,7 @@ function Item({
       >
         <span>
           <span aria-hidden className="blink invisible inline-block w-[1.6ch] group-focus:visible">
-            ▶
+            &gt;
           </span>
           {label}
           {external && (
