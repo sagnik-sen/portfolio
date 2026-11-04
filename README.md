@@ -1,6 +1,6 @@
 # Portfolio
 
-A personal portfolio site built with Next.js (App Router), TypeScript, Tailwind CSS v4, and Framer Motion.
+A personal portfolio site built with Next.js (App Router), TypeScript and Tailwind CSS v4.
 
 ## Getting started
 
@@ -11,9 +11,8 @@ Open http://localhost:3000.
 
 ## Before you deploy — things to fill in
 
-- src/components/sections/contact.tsx — replace the placeholder email, GitHub, and LinkedIn links with your real ones.
-- Consider swapping the abstract SVG project visuals (src/components/project-visual.tsx) for real screenshots or product shots of each project once you have them — the layout (aspect-[5/4] panel) will accept any image or video.
-- Add a resume PDF under public/ and link it from the hero or contact section if you want a direct download CTA.
+- Projects and their GitHub links live in src/content.ts.
+- Add a resume PDF under public/ and link it from the hero or contact section.
 
 ## Deploy
 
@@ -21,8 +20,6 @@ Easiest path is Vercel (vercel.com/new) — connect the repo (or run `npx vercel
 
 ## Structure
 
-- src/app/ — root layout, global styles, page assembly
-- src/components/sections/ — one file per page section (hero, about, projects, experience, leadership, skills, contact)
-- src/components/neural-field.tsx — the signature animated node-graph background
-- src/components/project-visual.tsx — abstract generative visuals for each project card
-- src/lib/utils.ts — cn() class-merging helper
+- src/content.ts — all site copy: projects, timeline, events, links
+- src/components/menu.tsx — the retro menu UI (hash-based screens, keyboard navigation)
+- src/app/ — root layout (fonts, metadata), global styles and color tokens

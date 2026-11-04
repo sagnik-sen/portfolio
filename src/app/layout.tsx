@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 
-const geistSans = { variable: GeistSans.variable };
-const geistMono = { variable: GeistMono.variable };
+const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-press-start" });
+const terminal = VT323({ weight: "400", subsets: ["latin"], variable: "--font-vt323" });
 
 export const metadata: Metadata = {
-  title: "Sagnik — AI Systems Engineer",
+  title: "Sagnik Sen",
   description:
-    "Computer Science student building applied AI/ML and GenAI systems — from LLM fine-tuning pipelines to production classification systems.",
+    "Computer science student at VIT Chennai working on applied machine learning: fine-tuning, serving and evaluating language models.",
 };
 
 export default function RootLayout({
@@ -18,11 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${pixel.variable} ${terminal.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
