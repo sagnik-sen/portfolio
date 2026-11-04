@@ -286,6 +286,13 @@ const screens: Record<string, Screen> = {
     body: (
       <>
         <Text>{INTRO}</Text>
+        <p className="mb-5 px-1 text-tertiary">
+          In a hurry?{" "}
+          <a href="/plain" className="underline decoration-line-strong underline-offset-4 hover:text-accent">
+            Read the one-page version
+          </a>
+          .
+        </p>
         <ul>
           <Item href="#projects" label="Projects" value={String(PROJECTS.length)} />
           <Item href="#skills" label="Skills" value={String(SKILLS.length)} />
@@ -690,7 +697,12 @@ export function Menu() {
           <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
             <span className="hidden sm:inline">↑↓/WS move · →/D open · ←/A back · Q menu · ? help</span>
             <span className="sm:hidden">tap or use the pad</span>
-            <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
+            <span className="flex gap-3">
+              <a href="/plain" className="underline decoration-line-strong underline-offset-4 hover:text-accent">
+                one-page version
+              </a>
+              <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
+            </span>
           </footer>
         </div>
       </div>

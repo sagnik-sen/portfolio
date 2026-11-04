@@ -223,6 +223,29 @@ body::after {
   to { top: calc(100% - 6rem); }
 }
 
+/* Plain pages (/plain, case studies): readable sans text and no CRT effects. */
+.plain {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.plain-link {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+}
+
+.plain-link:hover {
+  color: var(--accent);
+}
+
+body:has(.plain) {
+  background: var(--bg-base);
+}
+
+body:has(.plain)::after {
+  display: none;
+}
+
 /* Boot screen: only shown when the inline script in layout.tsx sets data-boot. */
 .boot {
   display: none;
