@@ -251,7 +251,7 @@ export function Menu() {
   }
 
   return (
-    <div className="flex min-h-svh justify-center p-3 sm:p-6 md:items-center md:p-10">
+    <div className="flex min-h-svh items-start justify-center p-3 sm:p-6 md:items-center md:p-10">
       <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
         <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
           <h1>SAGNIK SEN</h1>
