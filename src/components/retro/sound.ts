@@ -10,6 +10,8 @@ export function blip(kind: keyof typeof TONES) {
   if (!soundOn.get()) return;
   try {
     ctx ??= new AudioContext();
+    // A context created without a user gesture starts suspended.
+    void ctx.resume();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "square";

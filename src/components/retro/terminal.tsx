@@ -25,8 +25,6 @@ function run(input: string): string[] {
   const arg = args.join(" ").toLowerCase();
   const project = PROJECTS.find((p) => slug(p.name) === slug(arg));
   switch (cmd.toLowerCase()) {
-    case "":
-      return [];
     case "help":
       return HELP;
     case "whoami":
@@ -73,10 +71,11 @@ export function Terminal() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    const out = run(input);
-    unlock("hacker");
-    setLines(input.trim() === "clear" ? [] : [...lines, `$ ${input}`, ...out]);
+    const command = input.trim();
     setInput("");
+    if (!command) return;
+    unlock("hacker");
+    setLines(command.toLowerCase() === "clear" ? [] : [...lines, `$ ${command}`, ...run(command)]);
   };
 
   return (

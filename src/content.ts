@@ -174,7 +174,7 @@ export const ACHIEVEMENTS = [
 ];
 
 const hackathons = [...PROJECTS.map((p) => p.context), ...OLDER.map((o) => o.name)].filter((s) =>
-  s.toLowerCase().includes("hackathon"),
+  /hackathon/i.test(s),
 ).length;
 
 // The "save file" screen: every number is derived from the data above.

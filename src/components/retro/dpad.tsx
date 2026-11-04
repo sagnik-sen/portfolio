@@ -9,11 +9,9 @@ function Pad({ k, label, children, className = "" }: { k: string; label: string;
     <button
       type="button"
       aria-label={label}
-      // pointerdown + preventDefault keeps focus on the menu entry instead of the button
-      onPointerDown={(e) => {
-        e.preventDefault();
-        press(k);
-      }}
+      // Cancelling pointerdown keeps focus on the menu entry instead of this button.
+      onPointerDown={(e) => e.preventDefault()}
+      onClick={() => press(k)}
       className={`grid h-11 w-11 place-items-center border-2 border-line-strong bg-elevated text-xl text-primary active:bg-accent/30 ${className}`}
     >
       {children}

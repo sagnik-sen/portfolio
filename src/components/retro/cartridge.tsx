@@ -10,6 +10,10 @@ const loading = createStore<string | null>(null, null);
 // is not treated as a popup. Modified clicks and reduced motion open instantly.
 export function openExternal(e: MouseEvent<HTMLAnchorElement>, label: string) {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+  if (loading.get()) {
+    e.preventDefault(); // already opening one; ignore double clicks
+    return;
+  }
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   e.preventDefault();
   const href = e.currentTarget.href;

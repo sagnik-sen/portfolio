@@ -10,7 +10,12 @@ export default function NotFound() {
 
   useEffect(() => {
     unlock("lost");
-    const id = setInterval(() => setCount((c) => Math.max(0, c - 1)), 1000);
+    const id = setInterval(() => {
+      setCount((c) => {
+        if (c <= 1) clearInterval(id);
+        return Math.max(0, c - 1);
+      });
+    }, 1000);
     return () => clearInterval(id);
   }, []);
 

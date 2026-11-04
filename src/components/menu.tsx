@@ -316,7 +316,7 @@ const screens: Record<string, Screen> = {
     parent: "",
     body: (
       <>
-        <Text>SLOT 1 · SAGNIK SEN · last saved {new Date().getFullYear()}</Text>
+        <Text>SLOT 1 · SAGNIK SEN</Text>
         <dl className="space-y-1 px-1">
           {STATS.map((s) => (
             <div key={s.label} className="grid sm:grid-cols-[10rem_1fr] sm:gap-4">
@@ -393,7 +393,11 @@ function StatusBar({ clock }: { clock: string }) {
   return (
     <span className="flex items-center gap-3 text-secondary">
       <span className="hidden md:inline">{theme}</span>
-      {sound && <span aria-label="Sound on">♪</span>}
+      {sound && (
+        <span role="img" aria-label="Sound on">
+          ♪
+        </span>
+      )}
       <PixelIcon name="wifi" className="h-[1.3em] w-[1.3em]" />
       <PixelIcon name="battery" className="h-[1.3em] w-[1.3em]" />
       <span suppressHydrationWarning>{clock}</span>
@@ -409,6 +413,19 @@ export function Menu() {
   const root = useRef<HTMLDivElement>(null);
   const prev = useRef<string | null>(null);
   const konami = useRef(0);
+
+  // Tracks the Konami code. Returns true when the key belongs to the code's
+  // left/right/B/A tail, so it doesn't also open or leave a screen.
+  const advanceKonami = (k: string) => {
+    if (k === KONAMI[konami.current]) konami.current += 1;
+    else konami.current = k === KONAMI[0] ? 1 : 0;
+    if (konami.current === KONAMI.length) {
+      konami.current = 0;
+      window.location.hash = "cheats";
+      return true;
+    }
+    return konami.current > 4;
+  };
 
   const items = () =>
     Array.from(
@@ -447,10 +464,8 @@ export function Menu() {
         return;
       }
       const k = e.key.toLowerCase();
-      konami.current = k === KONAMI[konami.current] ? konami.current + 1 : k === KONAMI[0] ? 1 : 0;
-      if (konami.current === KONAMI.length) {
-        konami.current = 0;
-        window.location.hash = "cheats";
+      if (advanceKonami(k)) {
+        e.preventDefault();
         return;
       }
       const list = items();

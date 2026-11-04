@@ -12,7 +12,11 @@ export function createStore<T>(key: string | null, fallback: T) {
       if (value === undefined) {
         try {
           const raw = key === null ? null : localStorage.getItem(key);
-          value = raw === null ? fallback : (JSON.parse(raw) as T);
+          const parsed: unknown = raw === null ? fallback : JSON.parse(raw);
+          // Ignore stored values of the wrong shape (edited by hand, older format).
+          const sameShape =
+            typeof parsed === typeof fallback && Array.isArray(parsed) === Array.isArray(fallback);
+          value = sameShape ? (parsed as T) : fallback;
         } catch {
           value = fallback;
         }
@@ -27,9 +31,18 @@ export function createStore<T>(key: string | null, fallback: T) {
       listeners.forEach((cb) => cb());
     },
     subscribe(cb: () => void) {
+      // Pick up changes made in other tabs.
+      const onStorage = (e: StorageEvent) => {
+        if (key !== null && e.key === key) {
+          value = undefined;
+          cb();
+        }
+      };
       listeners.add(cb);
+      window.addEventListener("storage", onStorage);
       return () => {
         listeners.delete(cb);
+        window.removeEventListener("storage", onStorage);
       };
     },
   };
