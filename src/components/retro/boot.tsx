@@ -22,6 +22,7 @@ export function Boot() {
     const root = document.documentElement;
     if (!root.dataset.boot) return;
     const done = (e?: Event) => {
+      if (e instanceof KeyboardEvent && (e.metaKey || e.ctrlKey || e.altKey)) return;
       e?.preventDefault();
       e?.stopImmediatePropagation();
       delete root.dataset.boot;

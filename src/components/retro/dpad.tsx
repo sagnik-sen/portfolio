@@ -30,6 +30,7 @@ export function DPad() {
     return (
       <button
         type="button"
+        onPointerDown={(e) => e.preventDefault()}
         onClick={() => padOn.set(true)}
         className="dpad fixed bottom-3 right-3 z-30 border-2 border-line-strong bg-base px-3 py-1 text-lg text-secondary sm:hidden"
       >
@@ -47,6 +48,7 @@ export function DPad() {
       </div>
       <button
         type="button"
+        onPointerDown={(e) => e.preventDefault()}
         onClick={() => padOn.set(false)}
         className="self-start px-2 text-lg text-tertiary"
       >

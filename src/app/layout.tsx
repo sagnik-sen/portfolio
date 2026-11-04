@@ -20,7 +20,7 @@ const preload = `try{var d=document.documentElement,t=localStorage.getItem("them
 
 // Without JS, show the screens as one long page and hide the touch controls. Must sit in
 // Tailwind's base layer: its layered [hidden]{display:none!important} beats unlayered !important.
-const noscript = `<style>@layer base{section[hidden]:not([data-js-only]){display:block!important}.dpad,.boot{display:none!important}}</style>`;
+const noscript = `<style>@layer base{section[hidden]:not([data-js-only]){display:block!important}.dpad,.boot,button[data-item]{display:none!important}}</style>`;
 
 // schema.org Person for search engines; "<" is escaped so the JSON can't close the script tag.
 const jsonLd = JSON.stringify({

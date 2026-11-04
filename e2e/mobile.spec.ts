@@ -38,6 +38,7 @@ test("the pad can be hidden and stays hidden", async ({ page }) => {
 test("no sideways scrolling on any main screen", async ({ page }) => {
   for (const hash of ["", "#projects", "#projects/urbanpulse-chennai", "#experience", "#education", "#community", "#terminal", "#stats"]) {
     await visit(page, `/${hash}`);
+    await expect(page.locator(hash ? `section[id="${hash.slice(1)}"]` : "section:not([id])")).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, hash || "main").toBeLessThanOrEqual(0);
   }

@@ -8,7 +8,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  use: { baseURL: `http://localhost:${PORT}` },
+  // CI also writes an HTML report (uploaded when a run fails) and keeps a trace of retried tests.
+  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
+  use: { baseURL: `http://localhost:${PORT}`, trace: "on-first-retry" },
   webServer: {
     command: `npx next start -p ${PORT}`,
     url: `http://localhost:${PORT}`,

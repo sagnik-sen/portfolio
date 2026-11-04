@@ -106,7 +106,7 @@ test("external links show the cartridge overlay, then open a new tab", async ({ 
   const popup = page.waitForEvent("popup");
   await screen(page).getByRole("link", { name: /GitHub/ }).click();
   await expect(page.getByText(/LOADING CARTRIDGE/)).toBeVisible();
-  expect((await popup).url()).toContain("github.com/sagnik-sen");
+  await (await popup).waitForURL(/github\.com\/sagnik-sen/);
 });
 
 test("unknown pages show the continue screen", async ({ page }) => {

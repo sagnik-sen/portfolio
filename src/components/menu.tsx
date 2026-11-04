@@ -515,9 +515,9 @@ export function Menu() {
   // Put the cursor on the entry you came back from, or the first entry.
   useEffect(() => {
     const list = items().filter((el) => !el.dataset.back);
-    const from = lastNav
-      ? list.find((el) => el.dataset.nav === lastNav)
-      : list.find((el) => el.getAttribute("href") === `#${prev.current}`);
+    const from =
+      (lastNav && list.find((el) => el.dataset.nav === lastNav)) ||
+      list.find((el) => el.getAttribute("href") === `#${prev.current}`);
     lastNav = undefined;
     const input = root.current?.querySelector<HTMLElement>("section:not([hidden]) input");
     (from ?? input ?? list[0] ?? items()[0])?.focus({ preventScroll: true });
@@ -537,8 +537,10 @@ export function Menu() {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // While typing in the terminal, only Escape is ours.
+      const live = liveKey();
+      const parent = screens[live].parent;
       if (e.target instanceof HTMLInputElement) {
-        if (e.key === "Escape") window.location.hash = screens[liveKey()].parent ?? "";
+        if (e.key === "Escape") window.location.hash = parent ?? "";
         return;
       }
       if ((e.key === "`" || e.key === "~") && letterKeys.get()) {
@@ -555,11 +557,6 @@ export function Menu() {
       const action = input.letter && !letterKeys.get() ? undefined : input.action;
       const list = items();
       const i = list.indexOf(document.activeElement as HTMLElement);
-      const go = (hash: string) => {
-        e.preventDefault();
-        blip("back");
-        window.location.hash = hash;
-      };
       if (action === "up" || action === "down") {
         e.preventDefault();
         const step = action === "down" ? 1 : -1;
@@ -569,10 +566,10 @@ export function Menu() {
       } else if (action === "open" && i >= 0) {
         e.preventDefault();
         list[i].click();
-      } else if (action === "back" && screens[liveKey()].parent !== undefined) {
-        go(screens[liveKey()].parent!);
-      } else if (action === "home" && liveKey() !== "") {
-        go("");
+      } else if ((action === "back" && parent !== undefined) || (action === "home" && live !== "")) {
+        e.preventDefault();
+        blip("back");
+        window.location.hash = action === "home" ? "" : parent!;
       }
     };
     window.addEventListener("keydown", onKey);
