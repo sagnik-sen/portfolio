@@ -5,7 +5,7 @@ import { EXPERIENCE, PROJECTS } from "@/content";
 import { unlock } from "./achievements";
 
 const BOOT_LINES = [
-  "SAGNIK-OS BIOS v2026.11",
+  "BIOS v2026.11",
   "(C) Sagnik Sen. All rights reserved.",
   "",
   "CPU: caffeine-cooled @ 3 AM .......... OK",
@@ -22,6 +22,8 @@ export function Boot() {
     const root = document.documentElement;
     if (!root.dataset.boot) return;
     const done = (e?: Event) => {
+      if (e?.target instanceof Element && e.target.closest("a")) return; // let the skip link work
+      if (e instanceof KeyboardEvent && (e.metaKey || e.ctrlKey || e.altKey)) return;
       e?.preventDefault();
       e?.stopImmediatePropagation();
       delete root.dataset.boot;
@@ -46,7 +48,11 @@ export function Boot() {
 
   const step = 0.22;
   return (
-    <div aria-hidden className="boot fixed inset-0 z-40 bg-base p-6 text-xl leading-snug text-primary md:p-12 md:text-2xl">
+    <div className="boot fixed inset-0 z-40 bg-base p-6 text-xl leading-snug text-primary md:p-12 md:text-2xl">
+      <div aria-hidden>
+      {/* Shown at once (no delay): the biggest thing on screen, so the page's
+          largest paint happens on the first frame instead of after the fade-ins. */}
+      <p className="mb-6 font-pixel text-[40px] leading-tight text-accent md:text-[64px]">SAGNIK-OS</p>
       {BOOT_LINES.map((line, i) => (
         <p key={i} className="boot-line whitespace-pre-wrap" style={{ animationDelay: `${i * step}s` }}>
           {line || "\u00a0"}
@@ -61,6 +67,13 @@ export function Boot() {
       <p className="boot-line mt-6 text-accent" style={{ animationDelay: `${BOOT_LINES.length * step + 1.3}s` }}>
         <span className="blink">PRESS ANY KEY TO START</span>
       </p>
+      </div>
+      <a
+        href="/plain"
+        className="absolute inset-x-6 bottom-6 text-secondary underline decoration-line-strong underline-offset-4 md:inset-x-12 md:bottom-12"
+      >
+        In a hurry? Skip to the one-page version →
+      </a>
     </div>
   );
 }

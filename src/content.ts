@@ -3,6 +3,7 @@
 export const EMAIL = "sen.sagnik9@gmail.com";
 export const GITHUB = "https://github.com/sagnik-sen";
 export const LINKEDIN = "https://www.linkedin.com/in/sagnik-sen-71b848193/";
+export const SITE_URL = "https://sagnik-sen.vercel.app";
 
 export const INTRO =
   "Hi, I'm Sagnik, a computer science student at VIT Chennai. I build things around language models and the tools that measure them. This past summer I interned at Wizergos in Bengaluru, where I fine-tuned a small model to sort insurance email. On campus I'm General Secretary of GDG on Campus VIT Chennai and Programme Representative for B.Tech CSE.";
@@ -171,7 +172,17 @@ export const ACHIEVEMENTS = [
   { id: "cheater", title: "Cheater", hint: "Enter an old cheat code" },
   { id: "patient", title: "Patient player", hint: "Watch the whole boot screen" },
   { id: "lost", title: "Lost in the void", hint: "Find a page that doesn't exist" },
+  { id: "afk", title: "Screensaver", hint: "Leave the site alone for a minute" },
 ];
+
+// The skills screen: every tool tagged on a project, most used first, with the
+// projects that used it.
+export const SKILLS = Object.entries(
+  PROJECTS.reduce<Record<string, string[]>>((acc, p) => {
+    for (const tag of p.tags.split(", ")) (acc[tag] ??= []).push(p.name);
+    return acc;
+  }, {}),
+).sort(([a, x], [b, y]) => y.length - x.length || a.localeCompare(b));
 
 const hackathons = [...PROJECTS.map((p) => p.context), ...OLDER.map((o) => o.name)].filter((s) =>
   /hackathon/i.test(s),

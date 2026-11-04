@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { EMAIL, GITHUB, INTRO, LINKEDIN, PROJECTS, slug } from "@/content";
+import { EDUCATION, EMAIL, GITHUB, INTRO, LINKEDIN, OLDER, PROJECTS, SKILLS, slug } from "@/content";
 import { unlock } from "./achievements";
 import { soundOn } from "./sound";
 import { setTheme, THEMES } from "./theme";
@@ -13,11 +13,32 @@ const HELP = [
   "cat <project>     read a project",
   "open <screen>     go to a screen, e.g. open contact",
   "contact           how to reach me",
+  "skills            tools I've used, most used first",
+  "neofetch          system info",
   `theme <name>      ${THEMES.map((t) => t.id).join(", ")}`,
   "sound on/off      menu blips",
   "clear             clear the screen",
   "exit              back to the main menu",
 ];
+
+// The "SS" from the favicon, in ASCII so it lines up in the terminal font.
+const LOGO = [" ###    ### ", "#   #  #   #", "#      #    ", " ###    ### ", "    #      #", "#   #  #   #", " ###    ### "];
+
+function neofetch(): string[] {
+  const theme = THEMES.find((t) => t.id === (document.documentElement.dataset.theme ?? "ice"))?.label;
+  const info = [
+    "sagnik@sagnik-os",
+    "----------------",
+    "OS: SAGNIK-OS v2026.11",
+    `Host: ${EDUCATION[0].org}, ${EDUCATION[0].title}`,
+    `Uptime: since ${EDUCATION[0].date.slice(0, 4)}`,
+    `Packages: ${PROJECTS.length} projects (+${OLDER.length} side quests)`,
+    `Theme: ${theme}`,
+    `Score: ${EDUCATION[0].note}`,
+    "CPU: caffeine-cooled @ 3 AM",
+  ];
+  return info.map((line, i) => `${(LOGO[i] ?? "").padEnd(14)}${line}`);
+}
 
 // Returns the output lines for one command. Navigation commands change the hash.
 function run(input: string): string[] {
@@ -40,6 +61,10 @@ function run(input: string): string[] {
       return [];
     case "contact":
       return [`email     ${EMAIL}`, `github    ${GITHUB}`, `linkedin  ${LINKEDIN}`];
+    case "skills":
+      return SKILLS.map(([tool, used]) => `${`${tool} x${used.length}`.padEnd(24)} ${used.join(", ")}`);
+    case "neofetch":
+      return neofetch();
     case "theme":
       if (!THEMES.some((t) => t.id === arg)) return [`theme: pick one of ${THEMES.map((t) => t.id).join(", ")}`];
       setTheme(arg);
@@ -50,6 +75,7 @@ function run(input: string): string[] {
       if (arg === "on") unlock("dj");
       return [`sound ${arg === "on" ? "on" : "off"}`];
     case "sudo":
+      if (args[0] === "rm") return ["rm: refusing to remove '/': this portfolio is load-bearing"];
       return ["[sudo] password for recruiter: ********", `Access granted. Next step: ${EMAIL}`];
     case "exit":
       window.location.hash = "";

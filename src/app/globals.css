@@ -83,7 +83,7 @@
   --color-line-strong: var(--line-strong);
 
   --font-sans: var(--font-vt323);
-  --font-pixel: var(--font-press-start);
+  --font-pixel: var(--font-silkscreen);
 }
 
 * {
@@ -197,6 +197,53 @@ body::after {
   .type-in {
     animation: none;
   }
+}
+
+/* The phone keyboard needs the room while typing in the terminal. */
+:root:has(#terminal-input:focus) .dpad {
+  display: none;
+}
+
+/* Screensaver: the logo box bounces on two axes with different periods. */
+.ss-x {
+  animation: ss-x 9s linear infinite alternate;
+}
+
+.ss-y {
+  animation: ss-y 6.5s linear infinite alternate;
+}
+
+@keyframes ss-x {
+  from { left: 0; }
+  to { left: calc(100% - 20rem); }
+}
+
+@keyframes ss-y {
+  from { top: 0; }
+  to { top: calc(100% - 6rem); }
+}
+
+/* Plain pages (/plain, case studies): readable sans text and no CRT effects. */
+.plain {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.plain-link {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+}
+
+.plain-link:hover {
+  color: var(--accent);
+}
+
+body:has(.plain) {
+  background: var(--bg-base);
+}
+
+body:has(.plain)::after {
+  display: none;
 }
 
 /* Boot screen: only shown when the inline script in layout.tsx sets data-boot. */
