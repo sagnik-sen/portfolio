@@ -14,9 +14,38 @@ import {
   LINKEDIN,
   OLDER,
   PROJECTS,
+  STATS,
   slug,
   type Entry,
 } from "@/content";
+import { Toast, TrophyList, unlock } from "./retro/achievements";
+import { Boot } from "./retro/boot";
+import { CartridgeOverlay, openExternal } from "./retro/cartridge";
+import { DPad } from "./retro/dpad";
+import { PixelIcon, type IconName } from "./retro/icons";
+import { blip, soundOn } from "./retro/sound";
+import { createStore, useStore } from "./retro/store";
+import { Terminal } from "./retro/terminal";
+import { setTheme, THEMES, useTheme } from "./retro/theme";
+
+const PROJECT_ICONS: Record<string, IconName> = {
+  "insurance-email-classifier": "mail",
+  "urbanpulse-chennai": "wave",
+  atlas: "graph",
+  traise: "flask",
+  ephemera: "hourglass",
+  gdgdex: "qr",
+  pulseguard: "heart",
+  openescrow: "lock",
+  promptcheck: "check",
+};
+const projectIcon = (name: string) => {
+  const icon = PROJECT_ICONS[slug(name)];
+  return icon && <PixelIcon name={icon} />;
+};
+
+// Project detail screens opened so far, for the "Explorer" achievement.
+const visited = createStore<string[]>("visited", []);
 
 // The open screen lives in the URL hash ("#projects", "#projects/atlas"), so
 // links, the browser back button and deep links all work without a router.
@@ -43,7 +72,9 @@ function Item({
   label,
   value,
   back,
+  icon,
 }: {
+  icon?: ReactNode;
   href?: string;
   onSelect?: () => void;
   pressed?: boolean;
@@ -66,6 +97,7 @@ function Item({
         <span aria-hidden className="blink invisible inline-block w-[1.6ch] group-focus:visible">
           &gt;
         </span>
+        {icon && <span className="mr-2 text-secondary group-focus:text-accent">{icon}</span>}
         {label}
         {external && (
           <>
@@ -80,11 +112,28 @@ function Item({
   return (
     <li>
       {href ? (
-        <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} {...shared}>
+        <a
+          href={href}
+          target={external ? "_blank" : undefined}
+          rel={external ? "noreferrer" : undefined}
+          onClick={(e) => {
+            blip(back ? "back" : "select");
+            if (external) openExternal(e, label);
+          }}
+          {...shared}
+        >
           {content}
         </a>
       ) : (
-        <button type="button" onClick={onSelect} aria-pressed={pressed} {...shared}>
+        <button
+          type="button"
+          onClick={() => {
+            blip("select");
+            onSelect?.();
+          }}
+          aria-pressed={pressed}
+          {...shared}
+        >
           {content}
         </button>
       )}
@@ -92,29 +141,8 @@ function Item({
   );
 }
 
-// Theme lives on <html data-theme>; layout.tsx restores it before first paint.
-const THEMES = [
-  { id: "ice", label: "Ice blue" },
-  { id: "green", label: "Green phosphor" },
-  { id: "amber", label: "Amber monochrome" },
-  { id: "bios", label: "BIOS blue" },
-];
-const themeListeners = new Set<() => void>();
-const subscribeTheme = (cb: () => void) => {
-  themeListeners.add(cb);
-  return () => themeListeners.delete(cb);
-};
-const readTheme = () => document.documentElement.dataset.theme ?? "ice";
-function setTheme(id: string) {
-  document.documentElement.dataset.theme = id;
-  try {
-    localStorage.setItem("theme", id);
-  } catch {}
-  themeListeners.forEach((cb) => cb());
-}
-
 function ThemeList() {
-  const current = useSyncExternalStore(subscribeTheme, readTheme, () => "ice");
+  const current = useTheme();
   return (
     <ul>
       {THEMES.map((t) => (
@@ -123,68 +151,30 @@ function ThemeList() {
           label={t.label}
           value={t.id === current ? "[x]" : "[ ]"}
           pressed={t.id === current}
-          onSelect={() => setTheme(t.id)}
+          onSelect={() => {
+            setTheme(t.id);
+            unlock("stylist");
+          }}
         />
       ))}
     </ul>
   );
 }
 
-const BOOT_LINES = [
-  "SAGNIK-OS BIOS v2026.11",
-  "(C) Sagnik Sen. All rights reserved.",
-  "",
-  "CPU: caffeine-cooled @ 3 AM .......... OK",
-  "Memory test: 640K .................... OK",
-  `Loading projects ............... ${PROJECTS.length} found`,
-  `Loading experience ............. ${EXPERIENCE.length} found`,
-  "Mounting GDG on Campus VIT Chennai ... OK",
-];
-
-// Fake startup screen. Hidden by CSS unless <html data-boot> is set, so it never
-// flashes for repeat visits; any key, tap or 4 seconds dismisses it.
-function Boot() {
-  useEffect(() => {
-    const root = document.documentElement;
-    if (!root.dataset.boot) return;
-    const done = (e?: Event) => {
-      e?.preventDefault();
-      e?.stopImmediatePropagation();
-      delete root.dataset.boot;
-      try {
-        sessionStorage.setItem("booted", "1");
-      } catch {}
-      cleanup();
-    };
-    const timer = setTimeout(done, 4000);
-    window.addEventListener("keydown", done, true);
-    window.addEventListener("pointerdown", done, true);
-    const cleanup = () => {
-      clearTimeout(timer);
-      window.removeEventListener("keydown", done, true);
-      window.removeEventListener("pointerdown", done, true);
-    };
-    return cleanup;
-  }, []);
-
-  const step = 0.22;
+function SoundToggle() {
+  const on = useStore(soundOn);
   return (
-    <div aria-hidden className="boot fixed inset-0 z-40 bg-base p-6 text-xl leading-snug text-primary md:p-12 md:text-2xl">
-      {BOOT_LINES.map((line, i) => (
-        <p key={i} className="boot-line whitespace-pre-wrap" style={{ animationDelay: `${i * step}s` }}>
-          {line || "\u00a0"}
-        </p>
-      ))}
-      <div
-        className="boot-line mt-6 h-4 max-w-md border border-line-strong p-0.5"
-        style={{ animationDelay: `${BOOT_LINES.length * step}s` }}
-      >
-        <div className="boot-bar h-full bg-secondary" style={{ animationDelay: `${BOOT_LINES.length * step}s` }} />
-      </div>
-      <p className="boot-line mt-6 text-accent" style={{ animationDelay: `${BOOT_LINES.length * step + 1.3}s` }}>
-        <span className="blink">PRESS ANY KEY TO START</span>
-      </p>
-    </div>
+    <ul>
+      <Item
+        label="Menu sounds"
+        value={on ? "[on]" : "[off]"}
+        pressed={on}
+        onSelect={() => {
+          soundOn.set(!on);
+          if (!on) unlock("dj");
+        }}
+      />
+    </ul>
   );
 }
 
@@ -197,7 +187,7 @@ const Heading = ({ children }: { children: ReactNode }) => (
 );
 
 const Text = ({ children }: { children: ReactNode }) => (
-  <p className="mb-5 text-secondary">{children}</p>
+  <p className="type-in mb-5 text-secondary">{children}</p>
 );
 
 const Subheading = ({ children }: { children: ReactNode }) => (
@@ -243,8 +233,14 @@ const screens: Record<string, Screen> = {
           <Item href="#experience" label="Experience" value={String(EXPERIENCE.length)} />
           <Item href="#education" label="Education" />
           <Item href="#community" label="Community" />
-          <Item href="#settings" label="Settings" />
           <Item href="#contact" label="Contact" />
+          <li aria-hidden className="mt-3 px-1 text-tertiary">
+            ── extras ──
+          </li>
+          <Item href="#stats" label="Save file" />
+          <Item href="#trophies" label="Trophies" />
+          <Item href="#terminal" label="Terminal" value="~" />
+          <Item href="#settings" label="Settings" />
         </ul>
       </>
     ),
@@ -255,7 +251,7 @@ const screens: Record<string, Screen> = {
     body: (
       <ul>
         {PROJECTS.map((p) => (
-          <Item key={p.name} href={`#projects/${slug(p.name)}`} label={p.name} value={p.year} />
+          <Item key={p.name} href={`#projects/${slug(p.name)}`} label={p.name} value={p.year} icon={projectIcon(p.name)} />
         ))}
         <li aria-hidden className="mt-4 px-1 text-tertiary">
           ── team & older ──
@@ -309,9 +305,38 @@ const screens: Record<string, Screen> = {
       <>
         <Text>Display palette. Your choice is saved in this browser.</Text>
         <ThemeList />
+        <Subheading>audio</Subheading>
+        <SoundToggle />
         <p className="mt-6 px-1 text-tertiary">psst: old cheat codes still work here.</p>
       </>
     ),
+  },
+  stats: {
+    title: "Save file",
+    parent: "",
+    body: (
+      <>
+        <Text>SLOT 1 · SAGNIK SEN · last saved {new Date().getFullYear()}</Text>
+        <dl className="space-y-1 px-1">
+          {STATS.map((s) => (
+            <div key={s.label} className="grid sm:grid-cols-[10rem_1fr] sm:gap-4">
+              <dt className="text-tertiary">{s.label}</dt>
+              <dd className="text-primary">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </>
+    ),
+  },
+  trophies: {
+    title: "Trophies",
+    parent: "",
+    body: <TrophyList />,
+  },
+  terminal: {
+    title: "Terminal",
+    parent: "",
+    body: <Terminal />,
   },
   cheats: {
     title: "Cheats",
@@ -359,6 +384,23 @@ const screens: Record<string, Screen> = {
   ),
 };
 
+// Handheld-console style status icons. The theme name doubles as a hint that
+// palettes can be changed.
+function StatusBar({ clock }: { clock: string }) {
+  const current = useTheme();
+  const theme = THEMES.find((t) => t.id === current)?.label;
+  const sound = useStore(soundOn);
+  return (
+    <span className="flex items-center gap-3 text-secondary">
+      <span className="hidden md:inline">{theme}</span>
+      {sound && <span aria-label="Sound on">♪</span>}
+      <PixelIcon name="wifi" className="h-[1.3em] w-[1.3em]" />
+      <PixelIcon name="battery" className="h-[1.3em] w-[1.3em]" />
+      <span suppressHydrationWarning>{clock}</span>
+    </span>
+  );
+}
+
 export function Menu() {
   const hash = useSyncExternalStore(subscribeHash, readHash, () => "");
   const clock = useSyncExternalStore(subscribeClock, readClock, () => "--:--");
@@ -377,15 +419,33 @@ export function Menu() {
   useEffect(() => {
     const list = items().filter((el) => !el.dataset.back);
     const from = list.find((el) => el.getAttribute("href") === `#${prev.current}`);
-    (from ?? list[0])?.focus({ preventScroll: true });
+    const input = root.current?.querySelector<HTMLElement>("section:not([hidden]) input");
+    (from ?? input ?? list[0])?.focus({ preventScroll: true });
     prev.current = key;
     window.scrollTo(0, 0);
-     
+
+    if (key === "contact") unlock("recruiter");
+    if (key === "cheats") unlock("cheater");
+    if (key.startsWith("projects/") && !visited.get().includes(key)) {
+      const seen = [...visited.get(), key];
+      visited.set(seen);
+      if (PROJECTS.every((p) => seen.includes(`projects/${slug(p.name)}`))) unlock("explorer");
+    }
   }, [key]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // While typing in the terminal, only Escape is ours.
+      if (e.target instanceof HTMLInputElement) {
+        if (e.key === "Escape") window.location.hash = screen.parent ?? "";
+        return;
+      }
+      if (e.key === "`" || e.key === "~") {
+        e.preventDefault();
+        window.location.hash = "terminal";
+        return;
+      }
       const k = e.key.toLowerCase();
       konami.current = k === KONAMI[konami.current] ? konami.current + 1 : k === KONAMI[0] ? 1 : 0;
       if (konami.current === KONAMI.length) {
@@ -400,14 +460,13 @@ export function Menu() {
         const step = e.key === "ArrowDown" ? 1 : -1;
         const next = i < 0 ? (step > 0 ? 0 : list.length - 1) : (i + step + list.length) % list.length;
         list[next]?.focus();
-      } else if (e.key === "ArrowRight" && i >= 0) {
+        blip("move");
+      } else if ((e.key === "ArrowRight" || k === "a") && i >= 0) {
         e.preventDefault();
         list[i].click();
-      } else if (
-        (e.key === "Escape" || e.key === "ArrowLeft" || e.key === "Backspace") &&
-        screen.parent !== undefined
-      ) {
+      } else if (["escape", "arrowleft", "backspace", "b"].includes(k) && screen.parent !== undefined) {
         e.preventDefault();
+        blip("back");
         window.location.hash = screen.parent;
       }
     };
@@ -424,13 +483,14 @@ export function Menu() {
   return (
     <>
       <Boot />
-      <div className="flex min-h-svh items-start justify-center p-3 sm:p-6 md:items-center md:p-10">
+      <Toast />
+      <CartridgeOverlay />
+      <DPad />
+      <div className="flex min-h-svh items-start justify-center p-3 pb-40 sm:p-6 md:items-center md:p-10">
         <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
           <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
             <h1>SAGNIK SEN</h1>
-            <span className="text-secondary" suppressHydrationWarning>
-              {clock}
-            </span>
+            <StatusBar clock={clock} />
           </header>
 
           <main className="min-h-[65svh] px-4 py-6 text-[22px] leading-snug md:px-8 md:py-8 md:text-2xl">
@@ -451,8 +511,8 @@ export function Menu() {
           </main>
 
           <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
-            <span className="hidden sm:inline">↑↓ select · enter open · esc back</span>
-            <span className="sm:hidden">tap to open</span>
+            <span className="hidden sm:inline">↑↓ select · enter/A open · esc/B back · ~ terminal</span>
+            <span className="sm:hidden">tap or use the pad · ~ terminal</span>
             <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
           </footer>
         </div>

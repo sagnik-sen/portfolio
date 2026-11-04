@@ -162,4 +162,31 @@ export const CHEATS = [
   "LIVES LEFT: 1. Hire before game over.",
 ];
 
+export const ACHIEVEMENTS = [
+  { id: "explorer", title: "Explorer", hint: "Open every project" },
+  { id: "recruiter", title: "Recruiter mode", hint: "Open the contact screen" },
+  { id: "stylist", title: "Interior designer", hint: "Change the palette" },
+  { id: "dj", title: "DJ", hint: "Turn the sound on" },
+  { id: "hacker", title: "Hacker", hint: "Run a command in the terminal" },
+  { id: "cheater", title: "Cheater", hint: "Enter an old cheat code" },
+  { id: "patient", title: "Patient player", hint: "Watch the whole boot screen" },
+  { id: "lost", title: "Lost in the void", hint: "Find a page that doesn't exist" },
+];
+
+const hackathons = [...PROJECTS.map((p) => p.context), ...OLDER.map((o) => o.name)].filter((s) =>
+  s.toLowerCase().includes("hackathon"),
+).length;
+
+// The "save file" screen: every number is derived from the data above.
+export const STATS = [
+  { label: "Level", value: "B.Tech CSE, VIT Chennai" },
+  { label: "High score", value: "CGPA 9.14" },
+  { label: "Quests", value: `${PROJECTS.length} projects + ${OLDER.length} side quests` },
+  { label: "Hackathons", value: String(hackathons) },
+  { label: "Events run", value: String(EVENTS.length) },
+  { label: "Guild ranks", value: `${GDG_ROLES.length} GDG roles` },
+  { label: "Badges", value: `${CERTIFICATIONS.length} certifications` },
+  { label: "Looking for", value: "Internships in applied AI" },
+];
+
 export const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
