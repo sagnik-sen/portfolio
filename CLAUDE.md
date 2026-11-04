@@ -9,8 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Build: `npm run build`
 - Lint: `npm run lint`
 - Typecheck: `npx tsc --noEmit`
+- E2E tests (Playwright, against the production build): `npm run build && npm run test:e2e`; one test: `npx playwright test -g "<name>"`
 
-Run build + lint + typecheck before saying a task is done. There is no test suite, so these three are the gate. Run `npm install` first if `node_modules` is missing.
+Run build + lint + typecheck + e2e tests before saying a task is done; CI (`.github/workflows/ci.yml`) runs the same four on every pull request. Run `npm install` first if `node_modules` is missing.
 
 ## Design rules
 - Retro emulator-menu (RGUI-style) theme: icy blue phosphor on near-black, amber for the selected item, VT323 body text, Press Start 2P for headings, CRT scanlines. Inspired by the style only; no RetroArch name or logo.
