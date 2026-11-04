@@ -18,7 +18,7 @@ const subscribeHash = (cb: () => void) => {
   window.addEventListener("hashchange", cb);
   return () => window.removeEventListener("hashchange", cb);
 };
-const readHash = () => decodeURIComponent(window.location.hash.slice(1));
+const readHash = () => window.location.hash.slice(1);
 
 const subscribeClock = (cb: () => void) => {
   const id = setInterval(cb, 10_000);
@@ -57,7 +57,12 @@ function Item({
             ▶
           </span>
           {label}
-          {external ? " ↗" : ""}
+          {external && (
+            <>
+              <span aria-hidden> ↗</span>
+              <span className="sr-only"> (opens in a new tab)</span>
+            </>
+          )}
         </span>
         {value && <span className="shrink-0 text-secondary group-focus:text-accent">{value}</span>}
       </a>
@@ -150,7 +155,7 @@ const screens: Record<string, Screen> = {
           ))}
         </ul>
         <ul>
-          <Item href="#projects/gdgdex" label="GDGdex, the meetup game I built" />
+          <Item href={`#projects/${slug("GDGdex")}`} label="GDGdex, the meetup game I built" />
         </ul>
       </>
     ),
@@ -194,14 +199,14 @@ const screens: Record<string, Screen> = {
 export function Menu() {
   const hash = useSyncExternalStore(subscribeHash, readHash, () => "");
   const clock = useSyncExternalStore(subscribeClock, readClock, () => "--:--");
-  const key = hash in screens ? hash : "";
+  const key = Object.hasOwn(screens, hash) ? hash : "";
   const screen = screens[key];
   const root = useRef<HTMLDivElement>(null);
   const prev = useRef<string | null>(null);
 
   const items = () =>
     Array.from(
-      root.current?.querySelectorAll<HTMLElement>(`[data-screen="${key}"] [data-item]`) ?? [],
+      root.current?.querySelectorAll<HTMLElement>("section:not([hidden]) [data-item]") ?? [],
     );
 
   // Put the cursor on the entry you came back from, or the first entry.
@@ -211,7 +216,7 @@ export function Menu() {
     (from ?? list[0])?.focus({ preventScroll: true });
     prev.current = key;
     window.scrollTo(0, 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [key]);
 
   useEffect(() => {
@@ -240,9 +245,10 @@ export function Menu() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  const trail = [key === "" ? "Main Menu" : "Main", key.startsWith("projects/") ? "Projects" : null, key ? screen.title : null]
-    .filter(Boolean)
-    .join(" › ");
+  const trail: string[] = [];
+  for (let k: string | undefined = key; k !== undefined; k = screens[k].parent) {
+    trail.unshift(screens[k].title);
+  }
 
   return (
     <div className="flex min-h-svh justify-center p-3 sm:p-6 md:items-center md:p-10">
@@ -255,9 +261,12 @@ export function Menu() {
         </header>
 
         <main className="min-h-[65svh] px-4 py-6 text-[22px] leading-snug md:px-8 md:py-8 md:text-2xl">
+          <p className="sr-only" aria-live="polite">
+            {screen.title}
+          </p>
           {Object.entries(screens).map(([k, s]) => (
-            <section key={k} data-screen={k} hidden={k !== key}>
-              <Heading>{k === key ? trail : s.title}</Heading>
+            <section key={k} hidden={k !== key}>
+              <Heading>{k === key ? trail.join(" › ") : s.title}</Heading>
               {s.parent !== undefined && (
                 <ul className="mb-4">
                   <Item href={`#${s.parent}`} label="Back" back />
@@ -271,7 +280,7 @@ export function Menu() {
         <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
           <span className="hidden sm:inline">↑↓ select · enter open · esc back</span>
           <span className="sm:hidden">tap to open</span>
-          <span>© {new Date().getFullYear()}</span>
+          <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
         </footer>
       </div>
     </div>
