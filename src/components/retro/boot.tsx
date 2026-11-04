@@ -5,7 +5,7 @@ import { EXPERIENCE, PROJECTS } from "@/content";
 import { unlock } from "./achievements";
 
 const BOOT_LINES = [
-  "SAGNIK-OS BIOS v2026.11",
+  "BIOS v2026.11",
   "(C) Sagnik Sen. All rights reserved.",
   "",
   "CPU: caffeine-cooled @ 3 AM .......... OK",
@@ -47,6 +47,9 @@ export function Boot() {
   const step = 0.22;
   return (
     <div aria-hidden className="boot fixed inset-0 z-40 bg-base p-6 text-xl leading-snug text-primary md:p-12 md:text-2xl">
+      {/* Shown at once (no delay): the biggest thing on screen, so the page's
+          largest paint happens on the first frame instead of after the fade-ins. */}
+      <p className="mb-6 font-pixel text-[32px] leading-tight text-accent md:text-5xl">SAGNIK-OS</p>
       {BOOT_LINES.map((line, i) => (
         <p key={i} className="boot-line whitespace-pre-wrap" style={{ animationDelay: `${i * step}s` }}>
           {line || "\u00a0"}
