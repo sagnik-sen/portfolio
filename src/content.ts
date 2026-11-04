@@ -152,4 +152,14 @@ export const EVENTS = [
   "Google Cloud Arcade 2025",
 ];
 
+// Shown on the hidden screen unlocked by the Konami code.
+export const CHEATS = [
+  "HIGH SCORE: CGPA 9.14",
+  "SPEEDRUN: 37% to 94.4% accuracy in one internship",
+  "BOSS FIGHT: 200/200 tampering attempts caught (UrbanPulse)",
+  "PARTY SIZE: GDGdex built for a 180-player meetup",
+  "SIDE QUESTS: 4 GDG roles since Dec 2024",
+  "LIVES LEFT: 1. Hire before game over.",
+];
+
 export const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-");

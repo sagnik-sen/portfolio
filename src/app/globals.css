@@ -21,6 +21,52 @@
   --scanline: rgba(0, 0, 0, 0.22);
 }
 
+/* Alternate palettes, picked in the Settings screen (data-theme set on <html>). */
+:root[data-theme="green"] {
+  --bg-base: #0a0f0a;
+  --bg-elevated: #111a11;
+  --bg-surface: #172417;
+  --text-primary: #c6f5b0;
+  --text-secondary: #86c76f;
+  --text-tertiary: #6a9f5b;
+  --accent: #ffb627;
+  --accent-soft: #ffd57a;
+  --line: rgba(134, 199, 111, 0.25);
+  --line-strong: rgba(134, 199, 111, 0.5);
+  --bg-void: #050805;
+  --glow: rgba(198, 245, 176, 0.25);
+}
+
+:root[data-theme="amber"] {
+  --bg-base: #0f0a03;
+  --bg-elevated: #1a1206;
+  --bg-surface: #241a0a;
+  --text-primary: #ffcc66;
+  --text-secondary: #e0a040;
+  --text-tertiary: #b88a3a;
+  --accent: #fff1c9;
+  --accent-soft: #fff8e6;
+  --line: rgba(224, 160, 64, 0.25);
+  --line-strong: rgba(224, 160, 64, 0.5);
+  --bg-void: #070401;
+  --glow: rgba(255, 204, 102, 0.25);
+}
+
+:root[data-theme="bios"] {
+  --bg-base: #0b1f5c;
+  --bg-elevated: #0e2670;
+  --bg-surface: #13308a;
+  --text-primary: #f2f5ff;
+  --text-secondary: #b4c4ff;
+  --text-tertiary: #93a8f0;
+  --accent: #ffd23f;
+  --accent-soft: #ffe58a;
+  --line: rgba(180, 196, 255, 0.25);
+  --line-strong: rgba(180, 196, 255, 0.5);
+  --bg-void: #05103a;
+  --glow: rgba(242, 245, 255, 0.2);
+}
+
 @theme inline {
   --color-base: var(--bg-base);
   --color-elevated: var(--bg-elevated);
@@ -92,5 +138,36 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .blink {
     animation: none;
+  }
+}
+
+/* Boot screen: only shown when the inline script in layout.tsx sets data-boot. */
+.boot {
+  display: none;
+}
+
+:root[data-boot] .boot {
+  display: block;
+}
+
+.boot-line {
+  opacity: 0;
+  animation: boot-in 0s steps(1) forwards;
+}
+
+@keyframes boot-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.boot-bar {
+  width: 0;
+  animation: boot-fill 1.2s steps(16) forwards;
+}
+
+@keyframes boot-fill {
+  to {
+    width: 100%;
   }
 }

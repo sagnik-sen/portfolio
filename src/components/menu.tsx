@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type PointerEvent, type ReactNode } from "react";
 import {
+  CHEATS,
   CERTIFICATIONS,
   EDUCATION,
   EMAIL,
@@ -34,46 +35,160 @@ const readClock = () =>
 
 type Screen = { title: string; parent?: string; body: ReactNode };
 
+// A menu entry: a link when given href, otherwise a button that runs onSelect.
 function Item({
   href,
+  onSelect,
+  pressed,
   label,
   value,
   back,
 }: {
-  href: string;
+  href?: string;
+  onSelect?: () => void;
+  pressed?: boolean;
   label: string;
   value?: string;
   back?: boolean;
 }) {
-  const external = href.startsWith("http");
+  const external = href?.startsWith("http") ?? false;
+  const shared = {
+    "data-item": true,
+    "data-back": back || undefined,
+    onPointerEnter: (e: PointerEvent<HTMLElement>) =>
+      e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true }),
+    className:
+      "group flex w-full items-baseline justify-between gap-4 px-1 text-left text-primary outline-none focus:bg-accent/15 focus:text-accent",
+  };
+  const content = (
+    <>
+      <span>
+        <span aria-hidden className="blink invisible inline-block w-[1.6ch] group-focus:visible">
+          &gt;
+        </span>
+        {label}
+        {external && (
+          <>
+            <span aria-hidden> ↗</span>
+            <span className="sr-only"> (opens in a new tab)</span>
+          </>
+        )}
+      </span>
+      {value && <span className="shrink-0 text-secondary group-focus:text-accent">{value}</span>}
+    </>
+  );
   return (
     <li>
-      <a
-        href={href}
-        data-item
-        data-back={back || undefined}
-        target={external ? "_blank" : undefined}
-        rel={external ? "noreferrer" : undefined}
-        onPointerEnter={(e) => e.pointerType === "mouse" && e.currentTarget.focus({ preventScroll: true })}
-        className="group flex items-baseline justify-between gap-4 px-1 text-primary outline-none focus:bg-accent/15 focus:text-accent"
-      >
-        <span>
-          <span aria-hidden className="blink invisible inline-block w-[1.6ch] group-focus:visible">
-            &gt;
-          </span>
-          {label}
-          {external && (
-            <>
-              <span aria-hidden> ↗</span>
-              <span className="sr-only"> (opens in a new tab)</span>
-            </>
-          )}
-        </span>
-        {value && <span className="shrink-0 text-secondary group-focus:text-accent">{value}</span>}
-      </a>
+      {href ? (
+        <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} {...shared}>
+          {content}
+        </a>
+      ) : (
+        <button type="button" onClick={onSelect} aria-pressed={pressed} {...shared}>
+          {content}
+        </button>
+      )}
     </li>
   );
 }
+
+// Theme lives on <html data-theme>; layout.tsx restores it before first paint.
+const THEMES = [
+  { id: "ice", label: "Ice blue" },
+  { id: "green", label: "Green phosphor" },
+  { id: "amber", label: "Amber monochrome" },
+  { id: "bios", label: "BIOS blue" },
+];
+const themeListeners = new Set<() => void>();
+const subscribeTheme = (cb: () => void) => {
+  themeListeners.add(cb);
+  return () => themeListeners.delete(cb);
+};
+const readTheme = () => document.documentElement.dataset.theme ?? "ice";
+function setTheme(id: string) {
+  document.documentElement.dataset.theme = id;
+  try {
+    localStorage.setItem("theme", id);
+  } catch {}
+  themeListeners.forEach((cb) => cb());
+}
+
+function ThemeList() {
+  const current = useSyncExternalStore(subscribeTheme, readTheme, () => "ice");
+  return (
+    <ul>
+      {THEMES.map((t) => (
+        <Item
+          key={t.id}
+          label={t.label}
+          value={t.id === current ? "[x]" : "[ ]"}
+          pressed={t.id === current}
+          onSelect={() => setTheme(t.id)}
+        />
+      ))}
+    </ul>
+  );
+}
+
+const BOOT_LINES = [
+  "SAGNIK-OS BIOS v2026.11",
+  "(C) Sagnik Sen. All rights reserved.",
+  "",
+  "CPU: caffeine-cooled @ 3 AM .......... OK",
+  "Memory test: 640K .................... OK",
+  `Loading projects ............... ${PROJECTS.length} found`,
+  `Loading experience ............. ${EXPERIENCE.length} found`,
+  "Mounting GDG on Campus VIT Chennai ... OK",
+];
+
+// Fake startup screen. Hidden by CSS unless <html data-boot> is set, so it never
+// flashes for repeat visits; any key, tap or 4 seconds dismisses it.
+function Boot() {
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!root.dataset.boot) return;
+    const done = (e?: Event) => {
+      e?.preventDefault();
+      e?.stopImmediatePropagation();
+      delete root.dataset.boot;
+      try {
+        sessionStorage.setItem("booted", "1");
+      } catch {}
+      cleanup();
+    };
+    const timer = setTimeout(done, 4000);
+    window.addEventListener("keydown", done, true);
+    window.addEventListener("pointerdown", done, true);
+    const cleanup = () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", done, true);
+      window.removeEventListener("pointerdown", done, true);
+    };
+    return cleanup;
+  }, []);
+
+  const step = 0.22;
+  return (
+    <div aria-hidden className="boot fixed inset-0 z-40 bg-base p-6 text-xl leading-snug text-primary md:p-12 md:text-2xl">
+      {BOOT_LINES.map((line, i) => (
+        <p key={i} className="boot-line whitespace-pre-wrap" style={{ animationDelay: `${i * step}s` }}>
+          {line || "\u00a0"}
+        </p>
+      ))}
+      <div
+        className="boot-line mt-6 h-4 max-w-md border border-line-strong p-0.5"
+        style={{ animationDelay: `${BOOT_LINES.length * step}s` }}
+      >
+        <div className="boot-bar h-full bg-secondary" style={{ animationDelay: `${BOOT_LINES.length * step}s` }} />
+      </div>
+      <p className="boot-line mt-6 text-accent" style={{ animationDelay: `${BOOT_LINES.length * step + 1.3}s` }}>
+        <span className="blink">PRESS ANY KEY TO START</span>
+      </p>
+    </div>
+  );
+}
+
+const KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
 
 const Heading = ({ children }: { children: ReactNode }) => (
   <h2 className="mb-5 font-pixel text-[11px] uppercase leading-relaxed text-accent md:text-xs">
@@ -128,6 +243,7 @@ const screens: Record<string, Screen> = {
           <Item href="#experience" label="Experience" value={String(EXPERIENCE.length)} />
           <Item href="#education" label="Education" />
           <Item href="#community" label="Community" />
+          <Item href="#settings" label="Settings" />
           <Item href="#contact" label="Contact" />
         </ul>
       </>
@@ -186,6 +302,27 @@ const screens: Record<string, Screen> = {
       </>
     ),
   },
+  settings: {
+    title: "Settings",
+    parent: "",
+    body: (
+      <>
+        <Text>Display palette. Your choice is saved in this browser.</Text>
+        <ThemeList />
+        <p className="mt-6 px-1 text-tertiary">psst: old cheat codes still work here.</p>
+      </>
+    ),
+  },
+  cheats: {
+    title: "Cheats",
+    parent: "",
+    body: (
+      <>
+        <Text>CHEATS ENABLED. You know the code, respect.</Text>
+        <Bullets items={CHEATS} />
+      </>
+    ),
+  },
   contact: {
     title: "Contact",
     parent: "",
@@ -229,6 +366,7 @@ export function Menu() {
   const screen = screens[key];
   const root = useRef<HTMLDivElement>(null);
   const prev = useRef<string | null>(null);
+  const konami = useRef(0);
 
   const items = () =>
     Array.from(
@@ -248,6 +386,13 @@ export function Menu() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      konami.current = k === KONAMI[konami.current] ? konami.current + 1 : k === KONAMI[0] ? 1 : 0;
+      if (konami.current === KONAMI.length) {
+        konami.current = 0;
+        window.location.hash = "cheats";
+        return;
+      }
       const list = items();
       const i = list.indexOf(document.activeElement as HTMLElement);
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -277,38 +422,41 @@ export function Menu() {
   }
 
   return (
-    <div className="flex min-h-svh items-start justify-center p-3 sm:p-6 md:items-center md:p-10">
-      <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
-        <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
-          <h1>SAGNIK SEN</h1>
-          <span className="text-secondary" suppressHydrationWarning>
-            {clock}
-          </span>
-        </header>
+    <>
+      <Boot />
+      <div className="flex min-h-svh items-start justify-center p-3 sm:p-6 md:items-center md:p-10">
+        <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
+          <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
+            <h1>SAGNIK SEN</h1>
+            <span className="text-secondary" suppressHydrationWarning>
+              {clock}
+            </span>
+          </header>
 
-        <main className="min-h-[65svh] px-4 py-6 text-[22px] leading-snug md:px-8 md:py-8 md:text-2xl">
-          <p className="sr-only" aria-live="polite">
-            {screen.title}
-          </p>
-          {Object.entries(screens).map(([k, s]) => (
-            <section key={k} hidden={k !== key}>
-              <Heading>{k === key ? trail.join(" › ") : s.title}</Heading>
-              {s.parent !== undefined && (
-                <ul className="mb-4">
-                  <Item href={`#${s.parent}`} label="Back" back />
-                </ul>
-              )}
-              {s.body}
-            </section>
-          ))}
-        </main>
+          <main className="min-h-[65svh] px-4 py-6 text-[22px] leading-snug md:px-8 md:py-8 md:text-2xl">
+            <p className="sr-only" aria-live="polite">
+              {screen.title}
+            </p>
+            {Object.entries(screens).map(([k, s]) => (
+              <section key={k} hidden={k !== key}>
+                <Heading>{k === key ? trail.join(" › ") : s.title}</Heading>
+                {s.parent !== undefined && (
+                  <ul className="mb-4">
+                    <Item href={`#${s.parent}`} label="Back" back />
+                  </ul>
+                )}
+                {s.body}
+              </section>
+            ))}
+          </main>
 
-        <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
-          <span className="hidden sm:inline">↑↓ select · enter open · esc back</span>
-          <span className="sm:hidden">tap to open</span>
-          <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
-        </footer>
+          <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
+            <span className="hidden sm:inline">↑↓ select · enter open · esc back</span>
+            <span className="sm:hidden">tap to open</span>
+            <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
+          </footer>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
