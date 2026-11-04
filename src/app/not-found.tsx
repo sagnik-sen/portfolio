@@ -22,8 +22,8 @@ export default function NotFound() {
   return (
     <main className="grid min-h-svh place-items-center p-6 text-center text-2xl">
       <div className="crt border-4 border-double border-line-strong bg-base px-8 py-10">
-        <h1 className="font-pixel text-[16px] text-accent md:text-xl">{count > 0 ? "CONTINUE?" : "GAME OVER"}</h1>
-        <p className="mt-6 font-pixel text-4xl text-primary" aria-hidden>
+        <h1 className="font-pixel text-[24px] text-accent md:text-[32px]">{count > 0 ? "CONTINUE?" : "GAME OVER"}</h1>
+        <p className="mt-6 font-pixel text-[48px] text-primary" aria-hidden>
           {count > 0 ? count : ""}
         </p>
         <p className="mt-6 text-secondary">This page doesn&apos;t exist.</p>

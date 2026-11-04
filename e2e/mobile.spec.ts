@@ -15,7 +15,7 @@ test("D-pad moves, opens and goes back", async ({ page }) => {
   await visit(page);
   await tap(page, "Down");
   await tap(page, "A: open");
-  await expect(page).toHaveURL(/#experience$/);
+  await expect(page).toHaveURL(/#skills$/);
   await tap(page, "B: back");
   await expect(page).toHaveURL(/\/#?$/);
 });
@@ -36,7 +36,7 @@ test("the pad can be hidden and stays hidden", async ({ page }) => {
 });
 
 test("no sideways scrolling on any main screen", async ({ page }) => {
-  for (const hash of ["", "#projects", "#projects/urbanpulse-chennai", "#experience", "#education", "#community", "#terminal", "#stats"]) {
+  for (const hash of ["", "#projects", "#projects/urbanpulse-chennai", "#experience", "#education", "#community", "#terminal", "#stats", "#skills", "#controls"]) {
     await visit(page, `/${hash}`);
     await expect(page.locator(hash ? `section[id="${hash.slice(1)}"]` : "section:not([id])")).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

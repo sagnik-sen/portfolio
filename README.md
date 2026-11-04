@@ -11,10 +11,12 @@ A single page that looks and works like the menu of an old game emulator: icy bl
 Extras:
 
 - A boot screen on the first visit in each browser tab. Any key or tap skips it, and it never shows if you prefer reduced motion.
-- A terminal for browsing by command. Type `help` to see what it knows.
+- A skills screen built from the projects' tools, most used first, each linking to the projects that used it.
+- A terminal for browsing by command (`help`, `ls`, `cat atlas`, `skills`, `neofetch`, ...).
 - Trophies: achievements you unlock by exploring, saved in your browser.
 - Switchable color palettes and optional menu sounds, both in Settings.
-- An on-screen D-pad on phones.
+- An on-screen D-pad on phones, which can be hidden.
+- A screensaver after a minute without input on desktop.
 - A hidden screen for anyone who knows a certain old cheat code.
 
 Built with Next.js 16 (App Router), React 19, TypeScript and Tailwind CSS v4.
@@ -26,8 +28,9 @@ Built with Next.js 16 (App Router), React 19, TypeScript and Tailwind CSS v4.
 - ←, A or Esc: back
 - Q: main menu
 - `` ` `` or `~`: terminal
+- `?`: controls
 
-The letter keys and the terminal key can be switched off in Settings. On a phone, tap an entry or use the D-pad.
+The single-key shortcuts (letters, `` ` ``, `~`, `?`) can be switched off in Settings. On a phone, tap an entry or use the D-pad.
 
 ## Getting started
 
@@ -54,7 +57,7 @@ GitHub Actions runs lint, typecheck, build and the end-to-end tests on every pus
 
 - Copy (intro, projects, experience, links, trophies): `src/content.ts`. The menu in `src/components/menu.tsx` renders it.
 - Colors: CSS variables in `src/app/globals.css`. To add a palette, add a `:root[data-theme="..."]` block there and an entry in `THEMES` in `src/components/retro/theme.ts`.
-- Extras (boot screen, terminal, D-pad, trophies, sounds, pixel icons, themes): `src/components/retro/`.
+- Extras (boot screen, terminal, D-pad, trophies, sounds, screensaver, pixel icons, themes): `src/components/retro/`.
 
 ## Deploy
 

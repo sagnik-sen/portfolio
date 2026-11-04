@@ -172,7 +172,17 @@ export const ACHIEVEMENTS = [
   { id: "cheater", title: "Cheater", hint: "Enter an old cheat code" },
   { id: "patient", title: "Patient player", hint: "Watch the whole boot screen" },
   { id: "lost", title: "Lost in the void", hint: "Find a page that doesn't exist" },
+  { id: "afk", title: "Screensaver", hint: "Leave the site alone for a minute" },
 ];
+
+// The skills screen: every tool tagged on a project, most used first, with the
+// projects that used it.
+export const SKILLS = Object.entries(
+  PROJECTS.reduce<Record<string, string[]>>((acc, p) => {
+    for (const tag of p.tags.split(", ")) (acc[tag] ??= []).push(p.name);
+    return acc;
+  }, {}),
+).sort(([a, x], [b, y]) => y.length - x.length || a.localeCompare(b));
 
 const hackathons = [...PROJECTS.map((p) => p.context), ...OLDER.map((o) => o.name)].filter((s) =>
   /hackathon/i.test(s),

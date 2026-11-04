@@ -14,15 +14,18 @@ import {
   LINKEDIN,
   OLDER,
   PROJECTS,
+  SKILLS,
   STATS,
   slug,
   type Entry,
 } from "@/content";
 import { TrophyList, unlock } from "./retro/achievements";
 import { Boot } from "./retro/boot";
+import { Screensaver } from "./retro/screensaver";
 import { CartridgeOverlay, openExternal } from "./retro/cartridge";
 import { DPad, padOn } from "./retro/dpad";
 import { PixelIcon, type IconName } from "./retro/icons";
+import { letterKeys } from "./retro/prefs";
 import { blip, soundOn } from "./retro/sound";
 import { createStore, useStore, type Store } from "./retro/store";
 import { Terminal } from "./retro/terminal";
@@ -74,12 +77,14 @@ type Screen = { title: string; parent?: string; jsOnly?: boolean; body: ReactNod
 // next project and repeated Enter keeps paging in that direction.
 let lastNav: "prev" | "next" | undefined;
 
-async function copyLink() {
+// Copies text and confirms with a toast; if the clipboard is blocked, shows the
+// text so it can be copied by hand.
+async function copy(text: string, what: string) {
   try {
-    await navigator.clipboard.writeText(window.location.href);
-    notify("LINK COPIED");
+    await navigator.clipboard.writeText(text);
+    notify(`${what} COPIED`);
   } catch {
-    notify(`COPY THIS LINK: ${window.location.href}`);
+    notify(text);
   }
 }
 
@@ -199,8 +204,6 @@ function Toggle({ store, label, onEnable }: { store: Store<boolean>; label: stri
   );
 }
 
-// Single-letter shortcuts can be switched off (WCAG 2.1.4), e.g. for speech input.
-const letterKeys = createStore("letter-keys", true);
 
 type Action = "up" | "down" | "open" | "back" | "home";
 
@@ -225,8 +228,18 @@ const KEYS: Record<string, { action?: Action; codes?: string[]; letter?: boolean
 
 const KONAMI = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"];
 
+// Shown on the Controls screen; keep in sync with KEYS above.
+const CONTROLS = [
+  ["↑ ↓ / W S", "move the cursor"],
+  ["→ / D / Enter", "open"],
+  ["← / A / Esc / B", "back"],
+  ["Q", "back to the main menu"],
+  ["` or ~", "terminal"],
+  ["?", "this screen"],
+];
+
 const Heading = ({ children }: { children: ReactNode }) => (
-  <h2 className="mb-5 font-pixel text-[11px] uppercase leading-relaxed text-accent md:text-xs">
+  <h2 className="mb-5 font-pixel text-[16px] uppercase leading-relaxed text-accent">
     {children}
   </h2>
 );
@@ -275,6 +288,7 @@ const screens: Record<string, Screen> = {
         <Text>{INTRO}</Text>
         <ul>
           <Item href="#projects" label="Projects" value={String(PROJECTS.length)} />
+          <Item href="#skills" label="Skills" value={String(SKILLS.length)} />
           <Item href="#experience" label="Experience" value={String(EXPERIENCE.length)} />
           <Item href="#education" label="Education" />
           <Item href="#community" label="Community" />
@@ -285,6 +299,7 @@ const screens: Record<string, Screen> = {
           <Item href="#stats" label="Save file" />
           <Item href="#trophies" label="Trophies" />
           <Item href="#terminal" label="Terminal" value="~" />
+          <Item href="#controls" label="Controls" value="?" />
           <Item href="#settings" label="Settings" />
         </ul>
       </>
@@ -354,9 +369,58 @@ const screens: Record<string, Screen> = {
         <Subheading>audio & controls</Subheading>
         <ul>
           <Toggle store={soundOn} label="Menu sounds" onEnable={() => unlock("dj")} />
-          <Toggle store={letterKeys} label="Letter keys (WASD, Q, B, ~)" />
+          <Toggle store={letterKeys} label="Letter keys (WASD, Q, B, ~, ?)" />
         </ul>
         <p className="mt-6 px-1 text-tertiary">psst: old cheat codes still work here.</p>
+      </>
+    ),
+  },
+  skills: {
+    title: "Skills",
+    parent: "",
+    body: (
+      <>
+        <Text>Every tool from my projects, most used first.</Text>
+        <dl className="space-y-2 px-1">
+          {SKILLS.map(([tool, used]) => (
+            <div key={tool} className="grid sm:grid-cols-[13rem_1fr] sm:gap-4">
+              <dt className="text-primary">
+                {tool} <span className="text-accent">×{used.length}</span>
+              </dt>
+              <dd className="text-secondary">
+                {used.map((name, i) => (
+                  <span key={name}>
+                    {i > 0 && " · "}
+                    <a
+                      href={`#projects/${slug(name)}`}
+                      className="underline decoration-line-strong underline-offset-4 hover:text-accent"
+                    >
+                      {name}
+                    </a>
+                  </span>
+                ))}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </>
+    ),
+  },
+  controls: {
+    title: "Controls",
+    parent: "",
+    jsOnly: true,
+    body: (
+      <>
+        <dl className="space-y-1 px-1">
+          {CONTROLS.map(([keys, does]) => (
+            <div key={does} className="grid sm:grid-cols-[13rem_1fr] sm:gap-4">
+              <dt className="text-accent">{keys}</dt>
+              <dd className="text-primary">{does}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-6 px-1 text-tertiary">On phones, use the D-pad and the A/B buttons. Letter keys can be turned off in Settings.</p>
       </>
     ),
   },
@@ -408,6 +472,7 @@ const screens: Record<string, Screen> = {
         <Text>I&apos;m looking for internships and roles in applied AI. Email is best.</Text>
         <ul>
           <Item href={`mailto:${EMAIL}`} label="Email" value={EMAIL} />
+          <Item label="Copy email address" onSelect={() => void copy(EMAIL, "EMAIL")} />
           <Item href={GITHUB} label="GitHub" />
           <Item href={LINKEDIN} label="LinkedIn" />
         </ul>
@@ -422,7 +487,14 @@ const screens: Record<string, Screen> = {
         parent: "projects",
         body: (
           <>
-            <p className="mb-3 px-1 text-tertiary">{p.context}</p>
+            <div className="mb-4 flex items-center gap-4 px-1">
+              {PROJECT_ICONS[slug(p.name)] && (
+                <span className="grid h-16 w-16 shrink-0 place-items-center border-2 border-line-strong bg-elevated text-[44px] text-accent">
+                  <PixelIcon name={PROJECT_ICONS[slug(p.name)]} />
+                </span>
+              )}
+              <p className="text-tertiary">{p.context}</p>
+            </div>
             <Text>{p.note}</Text>
             {p.facts && <Bullets items={p.facts} />}
             <p className="mb-5 px-1 text-tertiary">
@@ -430,7 +502,7 @@ const screens: Record<string, Screen> = {
             </p>
             <ul>
               {p.url && <Item href={p.url} label="Open on GitHub" />}
-              <Item label="Copy link to this project" onSelect={() => void copyLink()} />
+              <Item label="Copy link to this project" onSelect={() => void copy(window.location.href, "LINK")} />
               {PROJECTS[i + 1] && (
                 <Item href={`#projects/${slug(PROJECTS[i + 1].name)}`} label={`Next: ${PROJECTS[i + 1].name}`} nav="next" />
               )}
@@ -543,9 +615,10 @@ export function Menu() {
         if (e.key === "Escape") window.location.hash = parent ?? "";
         return;
       }
-      if ((e.key === "`" || e.key === "~") && letterKeys.get()) {
+      const jump = { "`": "terminal", "~": "terminal", "?": "controls" }[e.key];
+      if (jump && letterKeys.get()) {
         e.preventDefault();
-        window.location.hash = "terminal";
+        window.location.hash = jump;
         return;
       }
       const input = KEYS[e.key.toLowerCase()];
@@ -575,7 +648,7 @@ export function Menu() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // Attached once: everything it reads is live (refs, the URL, the DOM).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const trail: string[] = [];
@@ -587,11 +660,12 @@ export function Menu() {
     <>
       <Boot />
       <Toast />
+      <Screensaver />
       <CartridgeOverlay />
       <DPad />
       <div className={`flex min-h-svh items-start justify-center p-3 sm:p-6 md:items-center md:p-10 ${pad ? "pb-36" : "pb-16"}`}>
         <div ref={root} className="crt w-full max-w-3xl border-4 border-double border-line-strong bg-base">
-          <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[10px] text-primary md:text-xs">
+          <header className="flex items-center justify-between gap-4 border-b-2 border-line-strong px-4 py-3 font-pixel text-[16px] text-primary">
             <h1>SAGNIK SEN</h1>
             <StatusBar />
           </header>
@@ -614,8 +688,8 @@ export function Menu() {
           </main>
 
           <footer className="flex justify-between gap-4 border-t-2 border-line-strong px-4 py-2 text-lg text-tertiary">
-            <span className="hidden sm:inline">↑↓/WS move · →/D open · ←/A back · Q menu · ~ terminal</span>
-            <span className="sm:hidden">tap or use the pad · ~ terminal</span>
+            <span className="hidden sm:inline">↑↓/WS move · →/D open · ←/A back · Q menu · ? help</span>
+            <span className="sm:hidden">tap or use the pad</span>
             <span suppressHydrationWarning>© {new Date().getFullYear()}</span>
           </footer>
         </div>

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, VT323 } from "next/font/google";
+import { Silkscreen, VT323 } from "next/font/google";
 import { EMAIL, GITHUB, LINKEDIN, SITE_URL } from "@/content";
 import "./globals.css";
 
-const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-press-start" });
+// Silkscreen is drawn on an 8px grid: use it at multiples of 8px to stay crisp.
+const pixel = Silkscreen({ weight: "400", subsets: ["latin"], variable: "--font-silkscreen" });
 const terminal = VT323({ weight: "400", subsets: ["latin"], variable: "--font-vt323" });
 
 export const metadata: Metadata = {

@@ -83,7 +83,7 @@
   --color-line-strong: var(--line-strong);
 
   --font-sans: var(--font-vt323);
-  --font-pixel: var(--font-press-start);
+  --font-pixel: var(--font-silkscreen);
 }
 
 * {
@@ -202,6 +202,25 @@ body::after {
 /* The phone keyboard needs the room while typing in the terminal. */
 :root:has(#terminal-input:focus) .dpad {
   display: none;
+}
+
+/* Screensaver: the logo box bounces on two axes with different periods. */
+.ss-x {
+  animation: ss-x 9s linear infinite alternate;
+}
+
+.ss-y {
+  animation: ss-y 6.5s linear infinite alternate;
+}
+
+@keyframes ss-x {
+  from { left: 0; }
+  to { left: calc(100% - 20rem); }
+}
+
+@keyframes ss-y {
+  from { top: 0; }
+  to { top: calc(100% - 6rem); }
 }
 
 /* Boot screen: only shown when the inline script in layout.tsx sets data-boot. */
