@@ -67,7 +67,6 @@ const OLDER = [
   { name: "OpenEscrow", url: "https://github.com/GryffinX/OpenEscrow" },
   { name: "CarbonCred", url: "https://github.com/GryffinX/CarbonCred" },
   { name: "ProjectHub", url: "https://github.com/sagnik-sen/ProjectHub" },
-  { name: "IMDB sentiment analysis", url: "https://github.com/sagnik-sen/imdb-sentiment-analysis" },
 ];
 
 export function Projects() {
