@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Entries, PlainSection, PlainShell } from "@/components/plain";
-import { CERTIFICATIONS, EDUCATION, EMAIL, EVENTS, EXPERIENCE, GDG_ROLES, INTRO, OLDER, PROJECTS, SKILLS } from "@/content";
+import { slug, CERTIFICATIONS, EDUCATION, EMAIL, EVENTS, EXPERIENCE, GDG_ROLES, INTRO, OLDER, PROJECTS, SKILLS } from "@/content";
 
 export const metadata: Metadata = {
   title: "Sagnik Sen · One-page portfolio",
@@ -20,7 +20,7 @@ export default function Plain() {
         </a>
       </p>
 
-      <PlainSection title="Projects">
+      <PlainSection title="Projects" id="projects">
         {PROJECTS.map((p) => (
           <article key={p.name} className="mb-10">
             <h3 className="text-xl font-semibold">
@@ -36,11 +36,18 @@ export default function Plain() {
               </ul>
             )}
             <p className="mt-2 text-[15px] text-tertiary">Tools: {p.tags}</p>
-            {p.url && (
-              <a href={p.url} className="plain-link mt-1 inline-block text-[15px]">
-                Code on GitHub
-              </a>
-            )}
+            <p className="mt-1 flex gap-5 text-[15px]">
+              {p.study && (
+                <a href={`/projects/${slug(p.name)}`} className="plain-link">
+                  Read the case study
+                </a>
+              )}
+              {p.url && (
+                <a href={p.url} className="plain-link">
+                  Code on GitHub
+                </a>
+              )}
+            </p>
           </article>
         ))}
         <p className="text-secondary">

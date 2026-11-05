@@ -508,6 +508,7 @@ const screens: Record<string, Screen> = {
               <span className="text-secondary">tools</span> {p.tags}
             </p>
             <ul>
+              {p.study && <Item href={`/projects/${slug(p.name)}`} label="Read the case study" />}
               {p.url && <Item href={p.url} label="Open on GitHub" />}
               <Item label="Copy link to this project" onSelect={() => void copy(window.location.href, "LINK")} />
               {PROJECTS[i + 1] && (

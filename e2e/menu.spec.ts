@@ -46,7 +46,8 @@ test("Konami code opens the cheats screen without triggering menu actions", asyn
 
 test("Next keeps the cursor on Next so Enter pages through projects", async ({ page }) => {
   await visit(page, "/#projects/atlas");
-  await expect(cursor(page)).toContainText("Open on GitHub");
+  await expect(cursor(page)).toContainText("Read the case study");
+  await page.keyboard.press("s"); // Open on GitHub
   await page.keyboard.press("s"); // Copy link
   await page.keyboard.press("s"); // Next
   await page.keyboard.press("Enter");

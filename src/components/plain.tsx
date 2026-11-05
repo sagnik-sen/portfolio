@@ -31,8 +31,8 @@ export function PlainShell({ children }: { children: ReactNode }) {
   );
 }
 
-export const PlainSection = ({ title, children }: { title: string; children: ReactNode }) => (
-  <section className="mt-12">
+export const PlainSection = ({ title, id, children }: { title: string; id?: string; children: ReactNode }) => (
+  <section id={id} className="mt-12">
     <h2 className="mb-4 font-pixel text-[16px] uppercase text-accent">{title}</h2>
     {children}
   </section>

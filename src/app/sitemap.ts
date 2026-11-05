@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/content";
+import { PROJECTS, SITE_URL, slug } from "@/content";
 
-// One page: the menu screens are URL hashes, which don't belong in a sitemap.
+// The menu screens are URL hashes, which don't belong in a sitemap; the plain pages do.
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [{ url: `${SITE_URL}/` }, { url: `${SITE_URL}/plain` }];
+  return [
+    { url: `${SITE_URL}/` },
+    { url: `${SITE_URL}/plain` },
+    ...PROJECTS.filter((p) => p.study).map((p) => ({ url: `${SITE_URL}/projects/${slug(p.name)}` })),
+  ];
 }
