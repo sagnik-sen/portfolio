@@ -20,9 +20,17 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      # Mobile Lighthouse on three pages, 3 runs each; budgets live in lighthouserc.json.
+      - run: npx -y @lhci/cli@0.15.1 autorun
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci-report/
           retention-days: 7

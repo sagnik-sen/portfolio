@@ -18,6 +18,7 @@ Extras:
 - An on-screen D-pad on phones, which can be hidden.
 - A screensaver after a minute without input on desktop.
 - A hidden screen for anyone who knows a certain old cheat code.
+- A plain one-page version at `/plain`, and case studies with diagrams for UrbanPulse, Atlas and OpenEscrow at `/projects/<slug>`.
 
 Built with Next.js 16 (App Router), React 19, TypeScript and Tailwind CSS v4.
 
@@ -58,6 +59,20 @@ GitHub Actions runs lint, typecheck, build and the end-to-end tests on every pus
 - Copy (intro, projects, experience, links, trophies): `src/content.ts`. The menu in `src/components/menu.tsx` renders it.
 - Colors: CSS variables in `src/app/globals.css`. To add a palette, add a `:root[data-theme="..."]` block there and an entry in `THEMES` in `src/components/retro/theme.ts`.
 - Extras (boot screen, terminal, D-pad, trophies, sounds, screensaver, pixel icons, themes): `src/components/retro/`.
+
+## Quality gates
+
+Every pull request runs lint, typecheck, the production build, and the Playwright suite (`.github/workflows/ci.yml`):
+
+- **End-to-end:** 33 tests on desktop Chrome and a Pixel 7, covering keyboard and D-pad navigation, the boot screen, the terminal, no-JS rendering and no sideways scrolling on phones.
+- **Accessibility:** axe checks for WCAG 2.1 A and AA on 12 pages (menu screens, `/plain`, the three case studies and the 404). Zero violations allowed.
+- **Lighthouse (mobile, median of 3 runs):** the build fails below 80 for performance or below 95 for accessibility, best practices or SEO. Last local run:
+
+| Page | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| `/` | 95 | 100 | 100 | 100 |
+| `/plain` | 98 | 100 | 100 | 100 |
+| `/projects/urbanpulse-chennai` | 99 | 100 | 100 | 100 |
 
 ## Deploy
 
